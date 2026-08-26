@@ -56,7 +56,9 @@ export function RepositoryDetailScreen() {
       />
       <RepositoryDetailContent
         repository={data}
-        onViewIssues={() => router.push(`/repository/${owner}/${repo}/issues`)}
+        onViewIssues={() =>
+          router.push(`/repository/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/issues`)
+        }
       />
     </>
   );

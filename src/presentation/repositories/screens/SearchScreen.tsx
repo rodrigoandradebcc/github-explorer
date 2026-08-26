@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box, GlassView, Heading, useTheme } from '@/design-system';
 import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
+import { DataSourceToggle } from '@/presentation/shared/components/DataSourceToggle';
 import { useDebounce } from '@/presentation/shared/hooks/useDebounce';
 import type { Repository } from '@/domain/entities/Repository';
 
@@ -45,7 +46,9 @@ export function SearchScreen() {
 
   const handleRepoPress = useCallback(
     (repo: Repository) => {
-      router.push(`/repository/${repo.owner.login}/${repo.name}`);
+      router.push(
+        `/repository/${encodeURIComponent(repo.owner.login)}/${encodeURIComponent(repo.name)}`,
+      );
     },
     [router],
   );
@@ -99,8 +102,16 @@ export function SearchScreen() {
         style={[styles.header, { paddingTop: insets.top }]}
         onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
       >
-        <Box paddingHorizontal="md" paddingTop="sm" paddingBottom="sm">
-          <Heading level={2}>GitHub Explorer</Heading>
+        <Box
+          paddingHorizontal="md"
+          paddingTop="sm"
+          paddingBottom="sm"
+          direction="row"
+          align="center"
+          justify="space-between"
+        >
+          <Heading level={2}>Repo Explorer</Heading>
+          <DataSourceToggle />
         </Box>
       </GlassView>
 
