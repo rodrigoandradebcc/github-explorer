@@ -3,6 +3,7 @@
 // Theme
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';
 export type { Theme, ThemeMode, ThemeProviderProps } from './theme/ThemeProvider';
+export type { ThemePreferenceStorage } from './theme/ThemePreferenceStorage';
 
 // Token types (values only accessible via useTheme)
 export type { ColorKey, ColorPalette } from './tokens/colors';

@@ -1,16 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 
 import { ThemeProvider, useTheme } from '../ThemeProvider';
+import type { ThemePreferenceStorage } from '../ThemePreferenceStorage';
 
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn().mockResolvedValue(null),
-  setItem: jest.fn().mockResolvedValue(undefined),
-}));
-
-const mockAsyncStorage = AsyncStorage as jest.Mocked<typeof AsyncStorage>;
+function fakeStorage(
+  overrides: Partial<ThemePreferenceStorage> = {},
+): jest.Mocked<ThemePreferenceStorage> {
+  return {
+    load: jest.fn().mockResolvedValue(null),
+    save: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  } as jest.Mocked<ThemePreferenceStorage>;
+}
 
 function TestConsumer() {
   const { mode, toggleMode, colors, spacing, sizes, radius } = useTheme();
@@ -27,10 +30,7 @@ function TestConsumer() {
 }
 
 describe('ThemeProvider', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockAsyncStorage.getItem.mockResolvedValue(null);
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   it('provides light mode by default', () => {
     render(
@@ -44,8 +44,9 @@ describe('ThemeProvider', () => {
   });
 
   it('toggles from light to dark and persists the choice', async () => {
+    const storage = fakeStorage();
     render(
-      <ThemeProvider>
+      <ThemeProvider storage={storage}>
         <TestConsumer />
       </ThemeProvider>,
     );
@@ -56,12 +57,13 @@ describe('ThemeProvider', () => {
 
     expect(screen.getByTestId('mode').props.children).toBe('dark');
     expect(screen.getByTestId('bg-color').props.children).toBe('#0D1117');
-    expect(mockAsyncStorage.setItem).toHaveBeenCalledWith('@github_explorer/theme_mode', 'dark');
+    expect(storage.save).toHaveBeenCalledWith('dark');
   });
 
   it('toggles back from dark to light', async () => {
+    const storage = fakeStorage();
     render(
-      <ThemeProvider initialMode="dark">
+      <ThemeProvider initialMode="dark" storage={storage}>
         <TestConsumer />
       </ThemeProvider>,
     );
@@ -71,14 +73,14 @@ describe('ThemeProvider', () => {
     });
 
     expect(screen.getByTestId('mode').props.children).toBe('light');
-    expect(mockAsyncStorage.setItem).toHaveBeenCalledWith('@github_explorer/theme_mode', 'light');
+    expect(storage.save).toHaveBeenCalledWith('light');
   });
 
-  it('restores persisted mode from AsyncStorage', async () => {
-    mockAsyncStorage.getItem.mockResolvedValue('dark');
+  it('adopts the mode loaded from injected storage', async () => {
+    const storage = fakeStorage({ load: jest.fn().mockResolvedValue('dark') });
 
     render(
-      <ThemeProvider>
+      <ThemeProvider storage={storage}>
         <TestConsumer />
       </ThemeProvider>,
     );
@@ -86,6 +88,7 @@ describe('ThemeProvider', () => {
     // wait for the useEffect to resolve
     await act(async () => {});
 
+    expect(storage.load).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('mode').props.children).toBe('dark');
   });
 

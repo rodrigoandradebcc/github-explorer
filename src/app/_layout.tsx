@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from '@/design-system';
+import { asyncStorageThemePreference } from '@/infrastructure/storage/AsyncStorageThemePreference';
 import { ApplicationProvider } from '@/presentation/di/ApplicationProvider';
 import { QueryProvider } from '@/presentation/di/QueryProvider';
 
@@ -28,7 +29,7 @@ export default function RootLayout() {
   return (
     <ApplicationProvider>
       <QueryProvider>
-        <ThemeProvider>
+        <ThemeProvider storage={asyncStorageThemePreference}>
           <ThemedStack />
         </ThemeProvider>
       </QueryProvider>

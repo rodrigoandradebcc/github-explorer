@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { darkColors, lightColors, type ColorPalette } from '../tokens/colors';
@@ -8,8 +7,7 @@ import type { Sizes } from '../tokens/sizes';
 import sizes from '../tokens/sizes';
 import type { Spacing } from '../tokens/spacing';
 import spacing from '../tokens/spacing';
-
-const STORAGE_KEY = '@github_explorer/theme_mode';
+import type { ThemePreferenceStorage } from './ThemePreferenceStorage';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -27,26 +25,36 @@ const ThemeContext = createContext<Theme | undefined>(undefined);
 export interface ThemeProviderProps {
   children: React.ReactNode;
   initialMode?: ThemeMode;
+  storage?: ThemePreferenceStorage;
 }
 
-export function ThemeProvider({ children, initialMode = 'light' }: ThemeProviderProps) {
+const noOpStorage: ThemePreferenceStorage = {
+  load: async () => null,
+  save: async () => undefined,
+};
+
+export function ThemeProvider({
+  children,
+  initialMode = 'light',
+  storage = noOpStorage,
+}: ThemeProviderProps) {
   const [mode, setMode] = useState<ThemeMode>(initialMode);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
+    storage.load().then((stored) => {
       if (stored === 'light' || stored === 'dark') {
         setMode(stored);
       }
     });
-  }, []);
+  }, [storage]);
 
   const toggleMode = useCallback(() => {
     setMode((prev) => {
       const next: ThemeMode = prev === 'light' ? 'dark' : 'light';
-      AsyncStorage.setItem(STORAGE_KEY, next);
+      void storage.save(next);
       return next;
     });
-  }, []);
+  }, [storage]);
 
   const value = useMemo<Theme>(
     () => ({
