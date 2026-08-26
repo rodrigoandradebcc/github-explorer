@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 import { Pressable, Text } from 'react-native';
 
@@ -66,6 +66,34 @@ describe('DataSourceProvider', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('current-source')).toHaveTextContent('gitlab'));
+  });
+
+  it('keeps an explicit user choice when a persisted source resolves late', async () => {
+    const selection = new DataSourceSelection('github');
+    let resolveLoad: (stored: DataSourceId | null) => void = () => undefined;
+    const storage: DataSourcePreferenceStorage = {
+      load: () =>
+        new Promise<DataSourceId | null>((resolve) => {
+          resolveLoad = resolve;
+        }),
+      save: async () => undefined,
+    };
+
+    render(
+      <DataSourceProvider selection={selection} storage={storage}>
+        <Probe />
+      </DataSourceProvider>,
+    );
+
+    fireEvent.press(screen.getByTestId('switch-to-gitlab'));
+    expect(selection.current).toBe('gitlab');
+
+    await act(async () => {
+      resolveLoad('github');
+    });
+
+    expect(selection.current).toBe('gitlab');
+    expect(screen.getByTestId('current-source')).toHaveTextContent('gitlab');
   });
 
   it('throws when useDataSource is used outside the provider', () => {

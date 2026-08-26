@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 
 import type { DataSourceId } from '@/domain/shared/DataSource';
 import type { DataSourcePreferenceStorage } from '@/domain/shared/DataSourcePreferenceStorage';
@@ -28,10 +35,14 @@ export function DataSourceProvider({
 }) {
   const source = useSyncExternalStore(selection.subscribe, () => selection.current);
 
+  // An explicit user choice always wins over a persisted one that resolves later:
+  // `cancelled` only guards unmount, not a load that is superseded while in flight.
+  const userChoseRef = useRef(false);
+
   useEffect(() => {
     let cancelled = false;
     void storage.load().then((stored) => {
-      if (!cancelled && stored !== null) selection.set(stored);
+      if (!cancelled && !userChoseRef.current && stored !== null) selection.set(stored);
     });
     return () => {
       cancelled = true;
@@ -42,6 +53,7 @@ export function DataSourceProvider({
     () => ({
       source,
       setSource: (next) => {
+        userChoseRef.current = true;
         selection.set(next);
         void storage.save(next);
       },
