@@ -14,18 +14,13 @@ export class ApiError extends Error {
 
 export const apiClient = axios.create({
   baseURL: 'https://api.github.com',
-  headers: {
-    Accept: 'application/vnd.github.v3+json',
-  },
+  headers: { Accept: 'application/vnd.github.v3+json' },
 });
 
-// Expo SDK 49+: public env vars must be prefixed with EXPO_PUBLIC_
 const token = process.env.EXPO_PUBLIC_GITHUB_TOKEN;
 
 apiClient.interceptors.request.use((config) => {
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -35,7 +30,6 @@ apiClient.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const data = error.response?.data as Record<string, unknown> | undefined;
     const message = typeof data?.['message'] === 'string' ? data['message'] : error.message;
-    const isRateLimit = status === 403 || status === 429;
-    return Promise.reject(new ApiError(status, message, isRateLimit));
+    return Promise.reject(new ApiError(status, message, status === 403 || status === 429));
   },
 );

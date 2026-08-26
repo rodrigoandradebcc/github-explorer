@@ -4,7 +4,7 @@ import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 
 import { Box, Input, useTheme } from '@/design-system';
 import { GithubApiErrorState } from '@/features/github/components/GithubApiErrorState';
-import type { Repository } from '@/services/api/types';
+import type { Repository } from '@/domain/entities/Repository';
 
 import { RepositoryCard } from './RepositoryCard';
 import { SearchEmptyPrompt } from './SearchEmptyPrompt';
@@ -99,10 +99,7 @@ export function SearchContent({
     [onRepoPress],
   );
 
-  const listContentStyle = useMemo(
-    () => ({ paddingTop: headerHeight }),
-    [headerHeight],
-  );
+  const listContentStyle = useMemo(() => ({ paddingTop: headerHeight }), [headerHeight]);
 
   const listScrollInsets = useMemo(
     () => ({ top: headerHeight, bottom: tabBarHeight }),

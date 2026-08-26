@@ -5,7 +5,7 @@ import React from 'react';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
 import { Avatar, Badge, Box, Card, Text, useTheme } from '@/design-system';
-import type { Issue } from '@/services/api/types';
+import type { Issue } from '@/domain/entities/Issue';
 
 import { labelColorToTone } from '../utils/labelColorToTone';
 
@@ -46,10 +46,10 @@ export function IssueCard({ issue, index = 0 }: IssueCardProps) {
 
           <Box direction="row" align="center" justify="space-between">
             <Box direction="row" align="center" gap="xs" flex={1}>
-              <Avatar uri={issue.user.avatar_url} fallback={issue.user.login} size="sm" />
+              <Avatar uri={issue.author.avatarUrl} fallback={issue.author.login} size="sm" />
               <Text size="xs" tone="muted" numberOfLines={1}>
-                {issue.user.login} ·{' '}
-                {formatDistanceToNow(new Date(issue.created_at), { addSuffix: true, locale: ptBR })}
+                {issue.author.login} ·{' '}
+                {formatDistanceToNow(issue.createdAt, { addSuffix: true, locale: ptBR })}
               </Text>
             </Box>
             <Text size="xs" tone="muted" weight="medium">

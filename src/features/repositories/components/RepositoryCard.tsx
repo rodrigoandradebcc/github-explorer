@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Avatar, Badge, Box, Card, Heading, Text, useTheme } from '@/design-system';
-import type { Repository } from '@/services/api/types';
+import type { Repository } from '@/domain/entities/Repository';
 import { formatCount } from '@/utils/formatCount';
 
 interface RepositoryCardProps {
@@ -82,7 +82,7 @@ export function RepositoryCard({
           <Box direction="column" gap="xs">
             <Box direction="row" align="center" justify="space-between">
               <Box direction="row" align="center" gap="xs">
-                <Avatar uri={repo.owner.avatar_url} fallback={repo.owner.login} size="sm" />
+                <Avatar uri={repo.owner.avatarUrl} fallback={repo.owner.login} size="sm" />
                 <Text variant="label" size="xs" tone="muted">
                   {repo.owner.login}
                 </Text>
@@ -90,7 +90,7 @@ export function RepositoryCard({
               <Box direction="row" align="center" gap="xs">
                 <Ionicons name="star" size={14} color={colors.warning} />
                 <Text size="sm" weight="medium">
-                  {formatCount(repo.stargazers_count)}
+                  {formatCount(repo.starsCount)}
                 </Text>
               </Box>
             </Box>

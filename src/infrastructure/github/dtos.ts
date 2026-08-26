@@ -1,4 +1,4 @@
-export interface Owner {
+export interface GitHubOwnerDto {
   login: string;
   id: number;
   avatar_url: string;
@@ -6,11 +6,11 @@ export interface Owner {
   type: 'User' | 'Organization';
 }
 
-export interface Repository {
+export interface GitHubRepositoryDto {
   id: number;
   name: string;
   full_name: string;
-  owner: Owner;
+  owner: GitHubOwnerDto;
   description: string | null;
   html_url: string;
   language: string | null;
@@ -23,7 +23,7 @@ export interface Repository {
   private: boolean;
 }
 
-export interface RepositoryDetail extends Repository {
+export interface GitHubRepositoryDetailsDto extends GitHubRepositoryDto {
   watchers_count: number;
   subscribers_count: number;
   network_count: number;
@@ -33,21 +33,14 @@ export interface RepositoryDetail extends Repository {
   pushed_at: string;
 }
 
-export interface IssueLabel {
-  id: number;
-  name: string;
-  color: string;
-  description: string | null;
-}
-
-export interface Issue {
+export interface GitHubIssueDto {
   id: number;
   number: number;
   title: string;
   body: string | null;
   state: 'open' | 'closed';
-  user: Owner;
-  labels: IssueLabel[];
+  user: GitHubOwnerDto;
+  labels: { id: number; name: string; color: string; description: string | null }[];
   comments: number;
   created_at: string;
   updated_at: string;
@@ -56,8 +49,8 @@ export interface Issue {
   pull_request?: { url: string };
 }
 
-export interface SearchRepositoriesResponse {
+export interface GitHubSearchRepositoriesResponseDto {
   total_count: number;
   incomplete_results: boolean;
-  items: Repository[];
+  items: GitHubRepositoryDto[];
 }

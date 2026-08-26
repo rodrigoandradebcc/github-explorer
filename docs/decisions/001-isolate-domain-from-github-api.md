@@ -1,0 +1,48 @@
+# ADR-001: Isolate the domain from the GitHub API
+
+## Status
+
+Accepted
+
+## Date
+
+2026-08-25
+
+## Context
+
+The UI previously consumed GitHub response types directly. API field names such as
+`stargazers_count`, transport details such as `pull_request`, and string timestamps therefore
+propagated through hooks, screens, and components. This coupled the application's core model to
+one external provider and made filtering and normalization presentation concerns.
+
+## Decision
+
+Keep entities and repository interfaces in `src/domain`, with no imports from external packages
+or outer application layers. Put GitHub DTOs, Axios configuration, mappers, and concrete repository
+implementations in `src/infrastructure/github`.
+
+Infrastructure converts snake_case DTOs to provider-independent, camelCase domain entities. It
+also removes pull requests returned by GitHub's issues endpoint before results reach the features.
+Features depend on domain-shaped results and use the concrete adapters only at their query boundary.
+
+## Alternatives considered
+
+### Move the existing API types into `domain`
+
+This would be a small change, but the domain would continue to mirror GitHub's wire format and
+would not be independent.
+
+### Keep API functions and introduce only mappers
+
+This would prevent DTO leakage but would not define ports for replacing or testing data providers.
+Repository interfaces make that boundary explicit without adding a use-case layer the application
+does not currently need.
+
+## Consequences
+
+- UI code uses provider-independent names and real `Date` values.
+- GitHub-specific response changes are contained in infrastructure DTOs and mappers.
+- Pull-request filtering is performed once at the integration boundary.
+- Adding another provider requires implementing the domain repositories.
+- Hooks currently select the concrete GitHub adapters; dependency injection can be introduced if
+  runtime provider selection or isolated hook tests become necessary.

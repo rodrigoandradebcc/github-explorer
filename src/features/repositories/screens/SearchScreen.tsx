@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Box, GlassView, Heading, useTheme } from '@/design-system';
 import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
 import { useDebounce } from '@/hooks/useDebounce';
-import { ApiError } from '@/services/api/client';
-import type { Repository } from '@/services/api/types';
+import type { Repository } from '@/domain/entities/Repository';
+import { ApiError } from '@/infrastructure/github/client';
 
 import { SearchBottomTabBar } from '../components/SearchBottomTabBar';
 import { SearchContent } from '../components/SearchContent';

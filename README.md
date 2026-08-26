@@ -19,7 +19,7 @@
 | Toque abre detalhes do repositório | ✅ | Navegação Expo Router para `/repository/:owner/:repo` |
 | Design System mínimo e tipado | ✅ | Tokens tipados (colors, spacing, radius, sizes) + 10 componentes base |
 | Showcase exibe todos os componentes | ✅ | Tela `/showcase` lista Avatar, Badge, Box, Button, Card, Heading, Input, Skeleton, Switch, Text com variações |
-| Integração com API do GitHub | ✅ | Axios com interceptors; funções tipadas em `src/services/api/github.ts` |
+| Integração com API do GitHub | ✅ | Ports de domínio e adapters tipados em `src/infrastructure/github` |
 | Cache controlado via biblioteca | ✅ | TanStack Query v5: staleTime por rota, paginação infinita e retry inteligente |
 | Commits pequenos e descritivos | ✅ | Convenção Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`) |
 | README com instalação e arquitetura | ✅ | Seções abaixo |
@@ -137,6 +137,13 @@ src/
 │       ├── index.tsx           # /repository/:owner/:repo → RepositoryDetailScreen
 │       └── issues.tsx          # /repository/:owner/:repo/issues → IssuesScreen
 │
+├── domain/                     # Núcleo sem dependências externas
+│   ├── entities/               # Repository, Issue e Owner
+│   ├── repositories/           # Interfaces dos repositórios (ports)
+│   └── shared/                 # Contratos compartilhados, como Page<T>
+│
+├── infrastructure/github/      # DTOs, mappers, Axios e adapters concretos do GitHub
+│
 ├── features/                   # Domínios de negócio, cada um auto-contido
 │   ├── repositories/
 │   │   ├── components/         # RepositoryCard, RepositoryCardSkeleton
@@ -146,7 +153,7 @@ src/
 │       ├── hooks/              # useRepositoryIssues
 │       └── screens/            # IssuesScreen (+ __tests__)
 │
-├── services/api/               # Camada HTTP: cliente Axios, funções tipadas da API do GitHub, ApiError
+├── services/                   # Serviços compartilhados de aplicação, como query keys
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
 │   ├── tokens/                 # colors, spacing, radius, sizes
 │   ├── theme/                  # ThemeProvider + useTheme (persiste o modo no AsyncStorage)
@@ -169,6 +176,15 @@ src/features/
 ├── issues/           # listagem, componentes e hooks de issues
 └── github/           # utilitários compartilhados entre features GitHub
 ```
+
+### Domínio independente da API
+
+Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
+TanStack Query ou qualquer outra dependência externa. Os formatos retornados pelo GitHub permanecem
+em `src/infrastructure/github/dtos.ts` e são convertidos para entidades por mappers na borda da
+aplicação. Assim, particularidades da API — incluindo o fato de o endpoint de issues também retornar
+pull requests — não vazam para telas e componentes. Veja o
+[ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
 
 ### Design System como módulo fechado
 

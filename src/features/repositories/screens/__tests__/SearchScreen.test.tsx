@@ -3,8 +3,8 @@ import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
 import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
-import { ApiError } from '@/services/api/client';
-import type { Repository } from '@/services/api/types';
+import { ApiError } from '@/infrastructure/github/client';
+import type { Repository } from '@/domain/entities/Repository';
 
 import { SearchScreen } from '../SearchScreen';
 
@@ -24,24 +24,24 @@ const mockHook = useSearchRepositories as jest.MockedFunction<typeof useSearchRe
 const makeRepo = (overrides: Partial<Repository> = {}): Repository => ({
   id: 1,
   name: 'react',
-  full_name: 'facebook/react',
+  fullName: 'facebook/react',
   owner: {
     id: 1,
     login: 'facebook',
-    avatar_url: 'https://example.com/avatar.png',
-    html_url: 'https://github.com/facebook',
-    type: 'Organization',
+    avatarUrl: 'https://example.com/avatar.png',
+    profileUrl: 'https://github.com/facebook',
+    type: 'organization',
   },
   description: 'A declarative UI library',
-  html_url: 'https://github.com/facebook/react',
+  url: 'https://github.com/facebook/react',
   language: 'JavaScript',
-  stargazers_count: 200000,
-  forks_count: 40000,
-  open_issues_count: 100,
+  starsCount: 200000,
+  forksCount: 40000,
+  openIssuesCount: 100,
   topics: [],
-  updated_at: '2024-01-01T00:00:00Z',
-  created_at: '2013-05-24T00:00:00Z',
-  private: false,
+  updatedAt: new Date('2024-01-01T00:00:00Z'),
+  createdAt: new Date('2013-05-24T00:00:00Z'),
+  isPrivate: false,
   ...overrides,
 });
 
@@ -98,7 +98,7 @@ describe('SearchScreen', () => {
     const repos = [makeRepo({ id: 1 }), makeRepo({ id: 2, name: 'redux' })];
     idleHook({
       data: {
-        pages: [{ total_count: 2, incomplete_results: false, items: repos }],
+        pages: [{ total: 2, nextPage: null, items: repos }],
         pageParams: [1],
       },
     });
@@ -113,7 +113,7 @@ describe('SearchScreen', () => {
 
   it('shows empty-results message when query returns no items', async () => {
     idleHook({
-      data: { pages: [{ total_count: 0, incomplete_results: false, items: [] }], pageParams: [1] },
+      data: { pages: [{ total: 0, nextPage: null, items: [] }], pageParams: [1] },
     });
 
     renderWithTheme(<SearchScreen />);

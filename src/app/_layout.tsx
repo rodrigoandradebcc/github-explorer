@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from '@/design-system';
-import { ApiError } from '@/services/api/client';
+import { ApiError } from '@/infrastructure/github/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {

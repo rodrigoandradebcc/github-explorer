@@ -3,13 +3,13 @@ import { ScrollView, View } from 'react-native';
 import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
 
 import { Avatar, Box, Button, Card, Heading, Text, useTheme } from '@/design-system';
-import type { RepositoryDetail } from '@/services/api/types';
+import type { RepositoryDetails } from '@/domain/entities/Repository';
 import { formatCount } from '@/utils/formatCount';
 
 import { RepositoryStatItem } from './RepositoryStatItem';
 
 interface RepositoryDetailContentProps {
-  repository: RepositoryDetail;
+  repository: RepositoryDetails;
   onViewIssues: () => void;
 }
 
@@ -28,7 +28,7 @@ export function RepositoryDetailContent({
             <Box direction="column" gap="sm">
               <Box direction="row" align="center" gap="md">
                 <Avatar
-                  uri={repository.owner.avatar_url}
+                  uri={repository.owner.avatarUrl}
                   fallback={repository.owner.login}
                   size="lg"
                 />
@@ -51,19 +51,19 @@ export function RepositoryDetailContent({
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               <RepositoryStatItem
                 icon="star-outline"
-                value={formatCount(repository.stargazers_count)}
+                value={formatCount(repository.starsCount)}
                 label="Stars"
                 iconColor={colors.warning}
               />
               <RepositoryStatItem
                 icon="git-branch-outline"
-                value={formatCount(repository.forks_count)}
+                value={formatCount(repository.forksCount)}
                 label="Forks"
                 iconColor={colors.success}
               />
               <RepositoryStatItem
                 icon="eye-outline"
-                value={formatCount(repository.watchers_count)}
+                value={formatCount(repository.watchersCount)}
                 label="Watchers"
                 iconColor={colors.info}
               />

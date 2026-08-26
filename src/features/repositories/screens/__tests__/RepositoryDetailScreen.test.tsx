@@ -3,8 +3,8 @@ import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
 import { useRepository } from '@/features/repositories/hooks/useRepository';
-import { ApiError } from '@/services/api/client';
-import type { RepositoryDetail } from '@/services/api/types';
+import { ApiError } from '@/infrastructure/github/client';
+import type { RepositoryDetails } from '@/domain/entities/Repository';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';
 
@@ -23,34 +23,34 @@ const mockHook = useRepository as jest.MockedFunction<typeof useRepository>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const makeDetail = (overrides: Partial<RepositoryDetail> = {}): RepositoryDetail => ({
+const makeDetail = (overrides: Partial<RepositoryDetails> = {}): RepositoryDetails => ({
   id: 1,
   name: 'react',
-  full_name: 'facebook/react',
+  fullName: 'facebook/react',
   owner: {
     id: 1,
     login: 'facebook',
-    avatar_url: 'https://example.com/avatar.png',
-    html_url: 'https://github.com/facebook',
-    type: 'Organization',
+    avatarUrl: 'https://example.com/avatar.png',
+    profileUrl: 'https://github.com/facebook',
+    type: 'organization',
   },
   description: 'A declarative UI library',
-  html_url: 'https://github.com/facebook/react',
+  url: 'https://github.com/facebook/react',
   language: 'JavaScript',
-  stargazers_count: 200000,
-  forks_count: 40000,
-  open_issues_count: 100,
+  starsCount: 200000,
+  forksCount: 40000,
+  openIssuesCount: 100,
   topics: [],
-  updated_at: '2024-01-01T00:00:00Z',
-  created_at: '2013-05-24T00:00:00Z',
-  private: false,
-  watchers_count: 200000,
-  subscribers_count: 10000,
-  network_count: 40000,
+  updatedAt: new Date('2024-01-01T00:00:00Z'),
+  createdAt: new Date('2013-05-24T00:00:00Z'),
+  isPrivate: false,
+  watchersCount: 200000,
+  subscribersCount: 10000,
+  networkCount: 40000,
   size: 1000,
-  default_branch: 'main',
+  defaultBranch: 'main',
   license: null,
-  pushed_at: '2024-01-01T00:00:00Z',
+  pushedAt: new Date('2024-01-01T00:00:00Z'),
   ...overrides,
 });
 

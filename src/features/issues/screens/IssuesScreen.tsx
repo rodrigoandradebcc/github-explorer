@@ -9,8 +9,8 @@ import { IssueCard } from '@/features/issues/components/IssueCard';
 import { IssuesEmptyState } from '@/features/issues/components/IssuesEmptyState';
 import { IssuesSkeletonList } from '@/features/issues/components/IssuesSkeletonList';
 import { useRepositoryIssues } from '@/features/issues/hooks/useRepositoryIssues';
-import { ApiError } from '@/services/api/client';
-import type { Issue } from '@/services/api/types';
+import type { Issue } from '@/domain/entities/Issue';
+import { ApiError } from '@/infrastructure/github/client';
 
 export function IssuesScreen() {
   const { owner, repo } = useLocalSearchParams<{ owner: string; repo: string }>();
@@ -29,10 +29,7 @@ export function IssuesScreen() {
   } = useRepositoryIssues(owner, repo);
 
   const isRateLimit = error instanceof ApiError && error.isRateLimit;
-  const issues = useMemo(
-    () => data?.pages.flatMap((page) => page).filter((i) => !i.pull_request) ?? [],
-    [data],
-  );
+  const issues = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
