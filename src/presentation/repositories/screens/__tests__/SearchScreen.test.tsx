@@ -133,7 +133,7 @@ describe('SearchScreen', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('rate-limit-error')).toBeTruthy();
-      expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();
+      expect(screen.getByText(/token de acesso/)).toBeTruthy();
     });
   });
 

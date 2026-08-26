@@ -3,7 +3,7 @@ import type { Owner } from './Owner';
 export interface IssueLabel {
   id: number;
   name: string;
-  color: string;
+  color: string | null;
   description: string | null;
 }
 

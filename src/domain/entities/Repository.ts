@@ -18,11 +18,11 @@ export interface Repository {
 }
 
 export interface RepositoryDetails extends Repository {
-  watchersCount: number;
-  subscribersCount: number;
-  networkCount: number;
-  size: number;
-  defaultBranch: string;
+  watchersCount: number | null;
+  subscribersCount: number | null;
+  networkCount: number | null;
+  size: number | null;
+  defaultBranch: string | null;
   license: { key: string; name: string; spdxId: string } | null;
   pushedAt: Date;
 }

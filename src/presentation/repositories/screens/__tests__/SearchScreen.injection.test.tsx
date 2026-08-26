@@ -8,8 +8,10 @@ import { applicationServicesWithRepo } from '@/presentation/di/ApplicationProvid
 
 import { SearchScreen } from '../SearchScreen';
 
+const mockPush = jest.fn();
+
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
   Stack: { Screen: () => null },
 }));
 
@@ -37,6 +39,8 @@ const injectedRepository: Repository = {
 };
 
 describe('SearchScreen service injection', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   it('renders repositories returned by the injected RepoService', async () => {
     const search = jest.fn().mockResolvedValue({
       items: [injectedRepository],
@@ -57,5 +61,45 @@ describe('SearchScreen service injection', () => {
       expect(screen.getByText('injected-repository')).toBeTruthy();
     });
     expect(search).toHaveBeenCalledWith('injected', 1);
+  });
+
+  it('refetches through the same injected service when the source switches', async () => {
+    const search = jest.fn().mockResolvedValue({
+      items: [injectedRepository],
+      total: 1,
+      nextPage: null,
+    });
+    const repositoryService = { search, details: jest.fn() } as unknown as RepoService;
+
+    renderWithProviders(<SearchScreen />, {
+      services: applicationServicesWithRepo(repositoryService),
+    });
+    fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
+    await waitFor(() => expect(screen.getByText('injected-repository')).toBeTruthy());
+    expect(search).toHaveBeenCalledTimes(1);
+
+    fireEvent.press(screen.getByTestId('data-source-option-gitlab'));
+
+    await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+    expect(search).toHaveBeenNthCalledWith(2, 'injected', 1);
+  });
+
+  it('URL-encodes route segments when opening a repository', async () => {
+    const nested: Repository = {
+      ...injectedRepository,
+      owner: { ...injectedRepository.owner, login: 'group/subgroup' },
+    };
+    const search = jest.fn().mockResolvedValue({ items: [nested], total: 1, nextPage: null });
+    const repositoryService = { search, details: jest.fn() } as unknown as RepoService;
+
+    renderWithProviders(<SearchScreen />, {
+      services: applicationServicesWithRepo(repositoryService),
+    });
+    fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
+    await waitFor(() => expect(screen.getByTestId(`repo-card-${nested.id}`)).toBeTruthy());
+
+    fireEvent.press(screen.getByTestId(`repo-card-${nested.id}`));
+
+    expect(mockPush).toHaveBeenCalledWith('/repository/group%2Fsubgroup/injected-repository');
   });
 });

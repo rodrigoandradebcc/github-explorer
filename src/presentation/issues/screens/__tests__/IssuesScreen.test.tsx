@@ -86,7 +86,7 @@ describe('IssuesScreen', () => {
     });
     renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-error')).toBeTruthy();
-    expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();
+    expect(screen.getByText(/token de acesso/)).toBeTruthy();
     expect(screen.queryByTestId('issues-retry-button')).toBeNull();
   });
 

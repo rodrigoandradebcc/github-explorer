@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Box, Button, Text, useTheme } from '@/design-system';
 
-interface GithubApiErrorStateProps {
+interface DataAccessErrorStateProps {
   isRateLimit: boolean;
   genericMessage: string;
   testID: string;
@@ -11,13 +11,13 @@ interface GithubApiErrorStateProps {
   retryTestID?: string;
 }
 
-export function GithubApiErrorState({
+export function DataAccessErrorState({
   isRateLimit,
   genericMessage,
   testID,
   onRetry,
   retryTestID,
-}: GithubApiErrorStateProps) {
+}: DataAccessErrorStateProps) {
   const { colors } = useTheme();
 
   return (
@@ -26,11 +26,11 @@ export function GithubApiErrorState({
         <Box direction="column" align="center" gap="sm">
           <Ionicons name="warning-outline" size={48} color={colors.warning} />
           <Text weight="bold" tone="danger">
-            Limite da API do GitHub atingido
+            Limite de requisições da API atingido
           </Text>
           <Text tone="muted" size="sm">
-            Adicione EXPO_PUBLIC_GITHUB_TOKEN no .env para aumentar o limite para 5.000
-            requisições/hora.
+            Aguarde alguns minutos ou configure um token de acesso no arquivo .env para aumentar o
+            limite.
           </Text>
         </Box>
       ) : (

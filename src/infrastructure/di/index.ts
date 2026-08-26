@@ -1,1 +1,1 @@
-export { issueService, repoService } from './container';
+export { dataSourceSelection, issueService, repoService } from './container';

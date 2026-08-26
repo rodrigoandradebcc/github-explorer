@@ -16,7 +16,7 @@ describe('AxiosGitHubRepositoryDataSource', () => {
     const result = await new AxiosGitHubRepositoryDataSource().searchRepositories('react', 2);
 
     expect(mockGet).toHaveBeenCalledWith('/search/repositories', {
-      params: { q: 'react', page: 2, per_page: 30 },
+      params: { q: 'react', page: 2, per_page: 20 },
     });
     expect(result).toBe(response);
   });

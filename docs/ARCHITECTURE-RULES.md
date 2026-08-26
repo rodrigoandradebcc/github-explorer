@@ -43,23 +43,27 @@ src/
 │   ├── entities/          Repository, RepositoryDetails, Issue, IssueLabel, Owner, issueRules
 │   ├── errors/            DataAccessError (kind: rateLimit|notFound|network|unknown) + isRateLimitError
 │   ├── repositories/      RepositoryRepository, IssueRepository   (ports)
-│   └── shared/            Page<T>
+│   └── shared/            Page<T>, DataSource (DATA_SOURCE_IDS/DataSourceId),
+│                          DataSourceSelection, DataSourcePreferenceStorage
 ├── application/
 │   ├── repositories/      SearchReposUseCase, GetRepoDetailsUseCase, RepoService
 │   └── issues/            ListRepoIssuesUseCase, IssueService
 ├── infrastructure/
-│   ├── github/            dtos, mappers, client (axios + ApiError), constants,
+│   ├── github/            dtos, mappers, client (axios + toDataAccessError), constants,
 │   │                      GitHub*DataSource (port) + AxiosGitHub*DataSource (impl),
 │   │                      GitHub*Repository (adapters dos ports de domínio)
+│   ├── gitlab/            espelho de github/ para a API do GitLab → GitLab*,
+│   │                      mais pageHeaders.ts (x-total / x-next-page)
 │   ├── query/             createQueryClient()
-│   ├── storage/           AsyncStorageThemePreference
-│   └── di/                container.ts — composition root
+│   ├── storage/           AsyncStorageThemePreference, AsyncStorageDataSourcePreference
+│   └── di/                container.ts + DataSourceRegistry + SourceRouted*Repository
+│                          — composition root
 ├── presentation/
-│   ├── di/                ApplicationProvider, QueryProvider
+│   ├── di/                ApplicationProvider, QueryProvider, DataSourceProvider
 │   ├── repositories/      components/, hooks/, screens/
-│   ├── issues/            components/, hooks/, screens/
-│   ├── github/            components/, navigation/, utils/
-│   └── shared/            queryKeys, formatCount, hooks/useDebounce
+│   ├── issues/            components/, hooks/, screens/, utils/
+│   └── shared/            queryKeys, formatCount, hooks/useDebounce, components/,
+│                          navigation/
 ├── design-system/         tokens/, theme/, components/
 └── app/                   rotas expo-router
 ```
@@ -144,11 +148,13 @@ Falha de acesso a dado é contrato de domínio, não de transporte. `domain/erro
 declara a classe e o union `kind` (`rateLimit`, `notFound`, `network`, `unknown`), mais o guard
 `isRateLimitError`.
 
-- `infrastructure/github/client.ts` traduz status HTTP para `kind` em `toDataAccessError` e lança no
-  interceptor. Status, header e vocabulário de HTTP param nessa linha.
+- `infrastructure/github/client.ts` e `infrastructure/gitlab/client.ts` traduzem status HTTP para
+  `kind` em `toDataAccessError` e lançam no interceptor. Status, header e vocabulário de HTTP param
+  nessa linha. Cada provider traduz conforme a sua semântica: no GitHub 403 e 429 são `rateLimit`;
+  no GitLab só 429 (403 lá é autorização, não limite).
 - `infrastructure/query/queryClient.ts` e as telas usam o guard. Nenhuma camada acima da infra
   conhece código HTTP.
 
-Provider novo (GitLab, GraphQL, cache local) traduz o erro dele para o mesmo `kind`. Não crie tipo de
-erro por provider, e não identifique erro por duck-typing (`'campo' in error`): contrato que o
-compilador não vê quebra calado em produção.
+Provider novo (GraphQL, cache local) traduz o erro dele para o mesmo `kind`. Não crie tipo de erro
+por provider, e não identifique erro por duck-typing (`'campo' in error`): contrato que o compilador
+não vê quebra calado em produção.

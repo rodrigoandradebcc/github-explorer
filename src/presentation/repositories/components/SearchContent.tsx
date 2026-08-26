@@ -3,7 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 
 import { Box, Input, useTheme } from '@/design-system';
-import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
+import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
+import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
 import type { Repository } from '@/domain/entities/Repository';
 
 import { RepositoryCard } from './RepositoryCard';
@@ -56,15 +57,18 @@ export function SearchContent({
 }: SearchContentProps) {
   const { colors, spacing } = useTheme();
 
+  // Repository ids are per-source integers and collide across sources, so the seen-set has to
+  // reset on a source switch as well as on a new query. `source` is an opaque reset key here.
+  const source = useDataSourceScope();
   const animatedIds = useRef(new Set<number>());
   useEffect(() => {
     animatedIds.current.clear();
-  }, [query]);
+  }, [query, source]);
 
   const searchInput = (
     <Box paddingHorizontal="md" paddingTop="sm" paddingBottom="xs">
       <Input
-        placeholder="Buscar repositórios no GitHub…"
+        placeholder="Buscar repositórios…"
         value={inputValue}
         onChangeText={onChangeText}
         autoCapitalize="none"
@@ -136,9 +140,9 @@ export function SearchContent({
     return (
       <View style={insetStyle}>
         {searchInput}
-        <GithubApiErrorState
+        <DataAccessErrorState
           isRateLimit={isRateLimit}
-          genericMessage="Não foi possível acessar o GitHub. Verifique sua conexão e tente novamente."
+          genericMessage="Não foi possível acessar a fonte de dados. Verifique sua conexão e tente novamente."
           testID={isRateLimit ? 'rate-limit-error' : 'generic-error'}
           onRetry={onRetry}
         />
