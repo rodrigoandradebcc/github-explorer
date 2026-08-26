@@ -2,8 +2,8 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 
 import { useTheme } from '@/design-system';
-import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
-import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
+import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
+import { getStackScreenOptions } from '@/presentation/shared/navigation/getStackScreenOptions';
 import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 
@@ -18,7 +18,7 @@ export function RepositoryDetailScreen() {
 
   const isRateLimit = isRateLimitError(error);
   const title = typeof repo === 'string' ? repo : undefined;
-  const headerOptions = getGithubStackScreenOptions({ title, colors });
+  const headerOptions = getStackScreenOptions({ title, colors });
 
   if (isLoading) {
     return (
@@ -33,7 +33,7 @@ export function RepositoryDetailScreen() {
     return (
       <>
         <Stack.Screen options={headerOptions} />
-        <GithubApiErrorState
+        <DataAccessErrorState
           isRateLimit={isRateLimit}
           genericMessage="Não foi possível carregar os detalhes do repositório."
           testID="detail-error"
@@ -49,7 +49,7 @@ export function RepositoryDetailScreen() {
   return (
     <>
       <Stack.Screen
-        options={getGithubStackScreenOptions({
+        options={getStackScreenOptions({
           title: `${data.owner.login}/${data.name}`,
           colors,
         })}

@@ -2,12 +2,12 @@ import { Platform } from 'react-native';
 
 import type { Theme } from '@/design-system';
 
-interface GithubStackScreenOptionsParams {
+interface StackScreenOptionsParams {
   title: string | undefined;
   colors: Theme['colors'];
 }
 
-export function getGithubStackScreenOptions({ title, colors }: GithubStackScreenOptionsParams) {
+export function getStackScreenOptions({ title, colors }: StackScreenOptionsParams) {
   return {
     title,
     headerTransparent: Platform.OS === 'ios',

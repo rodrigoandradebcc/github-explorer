@@ -3,8 +3,8 @@ import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 import { Box, useTheme } from '@/design-system';
-import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
-import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
+import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
+import { getStackScreenOptions } from '@/presentation/shared/navigation/getStackScreenOptions';
 import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { IssueCard } from '@/presentation/issues/components/IssueCard';
 import { IssuesEmptyState } from '@/presentation/issues/components/IssuesEmptyState';
@@ -59,7 +59,7 @@ export function IssuesScreen() {
   );
 
   const title = `Issues · ${repo}`;
-  const headerOptions = getGithubStackScreenOptions({ title, colors });
+  const headerOptions = getStackScreenOptions({ title, colors });
 
   if (isLoading) {
     return (
@@ -74,7 +74,7 @@ export function IssuesScreen() {
     return (
       <>
         <Stack.Screen options={headerOptions} />
-        <GithubApiErrorState
+        <DataAccessErrorState
           isRateLimit={isRateLimit}
           genericMessage="Não foi possível carregar as issues."
           testID="issues-error"

@@ -102,7 +102,7 @@ describe('RepositoryDetailScreen', () => {
     });
     renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.getByTestId('detail-error')).toBeTruthy();
-    expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();
+    expect(screen.getByText(/token de acesso/)).toBeTruthy();
     expect(screen.queryByTestId('detail-retry-button')).toBeNull();
   });
 
