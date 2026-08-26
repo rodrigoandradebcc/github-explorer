@@ -41,6 +41,7 @@ Import de `@/infrastructure` fora de `presentation/di/` e `app/_layout.tsx` é b
 src/
 ├── domain/
 │   ├── entities/          Repository, RepositoryDetails, Issue, IssueLabel, Owner, issueRules
+│   ├── errors/            DataAccessError (kind: rateLimit|notFound|network|unknown) + isRateLimitError
 │   ├── repositories/      RepositoryRepository, IssueRepository   (ports)
 │   └── shared/            Page<T>
 ├── application/
@@ -137,8 +138,17 @@ grep -rn "@/infrastructure" src/presentation | grep -v "/di/"                   
 npm run type-check && npm run lint && npm test
 ```
 
-## 11. Dívida conhecida
+## 11. Erros entre camadas
 
-`presentation/github/utils/isRateLimitError.ts` identifica erro de rate limit por duck-typing, para não importar `ApiError` de `infrastructure/github/client.ts`. Cumpre a letra do DIP, mas o contrato do erro não está declarado em lugar nenhum — renomear o campo na infra não quebra o `type-check`.
+Falha de acesso a dado é contrato de domínio, não de transporte. `domain/errors/DataAccessError.ts`
+declara a classe e o union `kind` (`rateLimit`, `notFound`, `network`, `unknown`), mais o guard
+`isRateLimitError`.
 
-Correção pendente: mover `ApiError` para `domain/errors/ApiError.ts`; infra importa e lança; presentation usa `instanceof`. Não replique o duck-typing em módulo novo.
+- `infrastructure/github/client.ts` traduz status HTTP para `kind` em `toDataAccessError` e lança no
+  interceptor. Status, header e vocabulário de HTTP param nessa linha.
+- `infrastructure/query/queryClient.ts` e as telas usam o guard. Nenhuma camada acima da infra
+  conhece código HTTP.
+
+Provider novo (GitLab, GraphQL, cache local) traduz o erro dele para o mesmo `kind`. Não crie tipo de
+erro por provider, e não identifique erro por duck-typing (`'campo' in error`): contrato que o
+compilador não vê quebra calado em produção.

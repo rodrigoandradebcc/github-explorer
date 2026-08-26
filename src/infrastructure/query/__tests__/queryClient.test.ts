@@ -1,4 +1,4 @@
-import { ApiError } from '@/infrastructure/github/client';
+import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { createQueryClient } from '../queryClient';
 
@@ -11,7 +11,8 @@ describe('createQueryClient', () => {
       staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
     });
-    expect(retry(0, new ApiError(429, 'rate limit', true))).toBe(false);
+    expect(retry(0, new DataAccessError('rateLimit', 'rate limit'))).toBe(false);
+    expect(retry(0, new DataAccessError('notFound', 'missing'))).toBe(true);
     expect(retry(0, new Error('network'))).toBe(true);
     expect(retry(1, new Error('network'))).toBe(false);
   });

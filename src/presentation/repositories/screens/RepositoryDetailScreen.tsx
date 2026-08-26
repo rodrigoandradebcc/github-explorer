@@ -4,7 +4,7 @@ import React from 'react';
 import { useTheme } from '@/design-system';
 import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
 import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
-import { isRateLimitError } from '@/presentation/github/utils/isRateLimitError';
+import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 
 import { RepositoryDetailContent } from '../components/RepositoryDetailContent';

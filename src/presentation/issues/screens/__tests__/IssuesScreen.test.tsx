@@ -4,6 +4,7 @@ import React from 'react';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useRepoIssues } from '@/presentation/issues/hooks/useRepoIssues';
 import type { Issue } from '@/domain/entities/Issue';
+import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { IssuesScreen } from '../IssuesScreen';
 
@@ -81,7 +82,7 @@ describe('IssuesScreen', () => {
   it('shows rate-limit error with token hint', () => {
     withData({
       isError: true,
-      error: Object.assign(new Error('rate limit exceeded'), { isRateLimit: true }),
+      error: new DataAccessError('rateLimit', 'rate limit exceeded'),
     });
     renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-error')).toBeTruthy();

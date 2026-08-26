@@ -4,6 +4,7 @@ import React from 'react';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import type { Repository } from '@/domain/entities/Repository';
+import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { SearchScreen } from '../SearchScreen';
 
@@ -124,7 +125,7 @@ describe('SearchScreen', () => {
   });
 
   it('shows rate-limit error with token hint', async () => {
-    const rateLimitErr = Object.assign(new Error('rate limit exceeded'), { isRateLimit: true });
+    const rateLimitErr = new DataAccessError('rateLimit', 'rate limit exceeded');
     idleHook({ isError: true, error: rateLimitErr });
 
     renderWithProviders(<SearchScreen />);

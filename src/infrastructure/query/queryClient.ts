@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 
-import { ApiError } from '@/infrastructure/github/client';
+import { isRateLimitError } from '@/domain/errors/DataAccessError';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -8,7 +8,7 @@ export function createQueryClient(): QueryClient {
       queries: {
         staleTime: 5 * 60 * 1000,
         retry: (failureCount, error) => {
-          if (error instanceof ApiError && error.isRateLimit) return false;
+          if (isRateLimitError(error)) return false;
           return failureCount < 1;
         },
         refetchOnWindowFocus: false,

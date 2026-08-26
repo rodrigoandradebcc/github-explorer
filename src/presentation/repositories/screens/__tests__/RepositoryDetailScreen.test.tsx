@@ -4,6 +4,7 @@ import React from 'react';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 import type { RepositoryDetails } from '@/domain/entities/Repository';
+import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';
 
@@ -97,7 +98,7 @@ describe('RepositoryDetailScreen', () => {
   it('shows rate-limit error with token hint', () => {
     withData({
       isError: true,
-      error: Object.assign(new Error('rate limit'), { isRateLimit: true }),
+      error: new DataAccessError('rateLimit', 'rate limit'),
     });
     renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.getByTestId('detail-error')).toBeTruthy();

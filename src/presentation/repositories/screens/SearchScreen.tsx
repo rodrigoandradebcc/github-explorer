@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, GlassView, Heading, useTheme } from '@/design-system';
-import { isRateLimitError } from '@/presentation/github/utils/isRateLimitError';
+import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import { useDebounce } from '@/presentation/shared/hooks/useDebounce';
 import type { Repository } from '@/domain/entities/Repository';

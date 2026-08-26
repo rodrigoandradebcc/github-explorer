@@ -139,6 +139,7 @@ src/
 │
 ├── domain/                     # Núcleo sem dependências externas
 │   ├── entities/               # Repository, Issue e Owner
+│   ├── errors/                 # DataAccessError e o guard isRateLimitError
 │   ├── repositories/           # Interfaces dos repositórios (ports)
 │   └── shared/                 # Contratos compartilhados, como Page<T>
 │
@@ -238,6 +239,15 @@ integração React; o design system define uma porta de persistência e funciona
 no-op quando usado isoladamente. Navegação continua em `app/` e `presentation/`, pois rotas e
 aparência de headers são responsabilidades de framework e apresentação. Veja o
 [ADR-004](docs/decisions/004-infrastructure-boundaries.md).
+
+### Contrato de erro no domínio
+
+`domain/errors/DataAccessError.ts` declara a falha de acesso a dado com um `kind` — `rateLimit`,
+`notFound`, `network` ou `unknown` — e o guard `isRateLimitError`. A infraestrutura traduz o status
+HTTP para esse vocabulário no interceptor, de modo que códigos 403, 404 e 429 não existem fora de
+`infrastructure/github`. Telas e query client dependem do guard de domínio, e renomear um `kind`
+passa a quebrar no `type-check`. Veja o
+[ADR-005](docs/decisions/005-domain-owned-error-contract.md).
 
 ### Design System como módulo fechado
 

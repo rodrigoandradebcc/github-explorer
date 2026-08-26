@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList } from 'react-native';
 import { Box, useTheme } from '@/design-system';
 import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
 import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
-import { isRateLimitError } from '@/presentation/github/utils/isRateLimitError';
+import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { IssueCard } from '@/presentation/issues/components/IssueCard';
 import { IssuesEmptyState } from '@/presentation/issues/components/IssuesEmptyState';
 import { IssuesSkeletonList } from '@/presentation/issues/components/IssuesSkeletonList';
