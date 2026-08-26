@@ -130,7 +130,7 @@ Ao usar **Expo Go** no celular, escaneie o QR Code exibido no terminal com a câ
 ```
 src/
 ├── app/                        # Rotas do Expo Router (apenas wrappers — sem lógica de negócio)
-│   ├── _layout.tsx             # Layout raiz: QueryClient + ThemeProvider + Stack
+│   ├── _layout.tsx             # Layout raiz: providers de apresentação + ThemeProvider + Stack
 │   ├── index.tsx               # / → SearchScreen
 │   ├── showcase.tsx            # /showcase → Showcase do Design System
 │   └── repository/[owner]/[repo]/
@@ -149,38 +149,51 @@ src/
 │
 ├── infrastructure/github/      # DTOs, mappers, Axios e adapters concretos do GitHub
 │
-├── features/                   # Domínios de negócio, cada um auto-contido
+├── presentation/               # UI e integração com frameworks de apresentação
 │   ├── repositories/
 │   │   ├── components/         # RepositoryCard, RepositoryCardSkeleton
-│   │   ├── hooks/              # useSearchRepositories, useRepository
+│   │   ├── hooks/              # useSearchRepos, useRepoDetails
 │   │   └── screens/            # SearchScreen, RepositoryDetailScreen (+ __tests__)
-│   └── issues/
-│       ├── hooks/              # useRepositoryIssues
-│       └── screens/            # IssuesScreen (+ __tests__)
+│   ├── issues/
+│   │   ├── hooks/              # useRepoIssues
+│   │   └── screens/            # IssuesScreen (+ __tests__)
+│   ├── github/                 # Estados de erro e navegação compartilhados
+│   ├── shared/                 # query keys, formatação e useDebounce
+│   ├── di/                     # ApplicationProvider e QueryProvider
+│   └── __test-utils__/         # renderWithProviders
 │
-├── services/                   # Serviços compartilhados de aplicação, como query keys
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
 │   ├── tokens/                 # colors, spacing, radius, sizes
 │   ├── theme/                  # ThemeProvider + useTheme (persiste o modo no AsyncStorage)
 │   └── components/             # Avatar, Badge, Box, Button, Card, Heading,
 │                               #   Input, Skeleton, Switch, Text
-└── hooks/                      # Hooks genéricos compartilhados (useDebounce)
 ```
 
 ---
 
 ## Decisões arquiteturais
 
-### Organização por feature
+### Camadas na raiz e organização por feature
 
-O código é agrupado por domínio (`repositories`, `issues`) em vez de por camada (`screens/`, `hooks/`, `components/`). Tudo que pertence a uma feature fica co-localizado. Adicionar um novo domínio significa criar uma nova pasta, sem alterar as existentes.
+As fronteiras arquiteturais ficam explícitas na raiz de `src/`: `domain/`, `application/`,
+`infrastructure/`, `presentation/`, `design-system/` e `app/`. Dentro de `presentation/`, o código
+continua agrupado por feature (`repositories`, `issues`) em vez de ser achatado em pastas globais
+como `screens/`, `hooks/` e `components/`. Tudo que pertence a uma feature permanece co-localizado;
+adicionar uma nova feature significa criar uma pasta sem alterar as existentes.
 
 ```
-src/features/
+src/presentation/
 ├── repositories/     # busca, detalhe, componentes e hooks de repositório
 ├── issues/           # listagem, componentes e hooks de issues
-└── github/           # utilitários compartilhados entre features GitHub
+├── github/           # apresentação compartilhada para recursos do GitHub
+├── shared/           # utilitários transversais exclusivos da apresentação
+└── di/               # providers de serviços e server state
 ```
+
+Os hooks resolvem `RepoService` e `IssueService` pelo `ApplicationProvider`, evitando imports de
+singletons em tempo de módulo e permitindo injetar fakes em testes. A configuração do TanStack
+Query também vive em `presentation/`, mantendo as rotas do Expo Router como wrappers finos. Veja o
+[ADR-003](docs/decisions/003-presentation-layer-and-dependency-injection.md).
 
 ### Domínio independente da API
 
@@ -220,7 +233,7 @@ Todos leem tokens via `useTheme()` — zero valores hex fixos ou estilos inline 
 
 ### Paginação infinita
 
-`useSearchRepositories` usa `useInfiniteQuery` do TanStack Query. O parâmetro `page` é gerenciado pela chave de query; `getNextPageParam` extrai o número da próxima página da resposta da API. O `FlatList` dispara `fetchNextPage` via `onEndReached` quando o usuário se aproxima do fim da lista. Skeletons de carregamento aparecem durante o fetch das páginas seguintes sem bloquear o scroll.
+`useSearchRepos` usa `useInfiniteQuery` do TanStack Query. O parâmetro `page` é gerenciado pela chave de query; `getNextPageParam` extrai o número da próxima página da resposta da API. O `FlatList` dispara `fetchNextPage` via `onEndReached` quando o usuário se aproxima do fim da lista. Skeletons de carregamento aparecem durante o fetch das páginas seguintes sem bloquear o scroll.
 
 ### Estratégia de cache com TanStack Query v5
 
