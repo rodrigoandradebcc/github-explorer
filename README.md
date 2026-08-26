@@ -1,11 +1,11 @@
 # GitHub Explorer
 
-> Aplicativo React Native para buscar repositórios do GitHub, visualizar detalhes e listar issues abertas — desenvolvido como avaliação técnica com foco em arquitetura de componentes, gerenciamento de estado servidor e disciplina de design system.
+> Aplicativo React Native para buscar repositórios, visualizar detalhes e listar issues abertas no GitHub **ou GitLab, com troca de fonte em tempo de execução** — desenvolvido como avaliação técnica com foco em arquitetura de componentes, gerenciamento de estado servidor e disciplina de design system.
 
 ![Expo SDK](https://img.shields.io/badge/Expo-54-000020?logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61dafb?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/testes-87%20passando-brightgreen?logo=jest&logoColor=white)
+![Tests](https://img.shields.io/badge/testes-162%20passando-brightgreen?logo=jest&logoColor=white)
 
 ---
 
@@ -20,6 +20,7 @@
 | Design System mínimo e tipado | ✅ | Tokens tipados (colors, spacing, radius, sizes) + 10 componentes base |
 | Showcase exibe todos os componentes | ✅ | Tela `/showcase` lista Avatar, Badge, Box, Button, Card, Heading, Input, Skeleton, Switch, Text com variações |
 | Integração com API do GitHub | ✅ | Ports de domínio e adapters tipados em `src/infrastructure/github` |
+| Troca de fonte de dados em tempo de execução (GitHub/GitLab) | ✅ | Registry no composition root + repositórios roteados por fonte; toggle no header da busca; preferência persistida |
 | Cache controlado via biblioteca | ✅ | TanStack Query v5: staleTime por rota, paginação infinita e retry inteligente |
 | Commits pequenos e descritivos | ✅ | Convenção Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`) |
 | README com instalação e arquitetura | ✅ | Seções abaixo |
@@ -34,12 +35,13 @@
 
 ## Funcionalidades
 
+- **Fonte de dados alternável** — GitHub ou GitLab via controle segmentado no header da busca; troca sem reiniciar, cache isolado por fonte e preferência persistida
 - **Busca de repositórios** com input com debounce e scroll infinito
-- **Detalhe do repositório** — avatar do dono, descrição, estrelas, forks, watchers e linguagem principal
-- **Lista de issues abertas** — labels com cores, autor, data relativa (locale pt-BR) e número da issue
+- **Detalhe do repositório** — avatar do dono, descrição, estrelas, forks, linguagem principal e watchers (campos que a fonte não fornece são omitidos, sem `if` por fonte na tela)
+- **Lista de issues abertas** — labels (com cor quando a fonte fornece), autor, data relativa (locale pt-BR) e número da issue
 - **Modo escuro / claro** com preferência persistida (AsyncStorage)
 - **Animações de entrada escalonadas** via React Native Reanimated
-- **Controle de rate limit** — detecta erros 403/429 do GitHub e exibe mensagem útil em vez de tentar novamente indefinidamente
+- **Controle de rate limit** — cada fonte traduz sua falha para o `kind` `rateLimit` do domínio (GitHub: 403 e 429; GitLab: 429) e a UI exibe mensagem útil em vez de tentar novamente indefinidamente
 - **Showcase do design system** — demonstração ao vivo de todos os tokens e componentes em `/showcase`
 
 ---
@@ -52,7 +54,7 @@
 | **React Native 0.81 / React 19**                       | Alvo mobile multiplataforma com New Architecture (Fabric + TurboModules) habilitada                                                       |
 | **TanStack Query v5**                                  | Cache de estado servidor com stale-while-revalidate, paginação infinita e controle de retentativas                                        |
 | **React Native Reanimated 4**                          | Animações na thread nativa: entradas escalonadas nas listas e feedback de pressão nos cards                                               |
-| **Axios**                                              | Cliente HTTP; interceptors centralizam autenticação e normalização de erros (`ApiError`)                                                  |
+| **Axios**                                              | Cliente HTTP; um client por fonte, com interceptors centralizando autenticação e a tradução para `DataAccessError`                        |
 | **date-fns**                                           | Utilitários de data leves e tree-shakable com locale pt-BR para timestamps relativos                                                      |
 | **TypeScript — `strict` + `noUncheckedIndexedAccess`** | Segurança máxima de tipos; captura bugs de acesso a array em tempo de compilação                                                          |
 | **Jest + jest-expo + Testing Library**                 | Testes unitários e de componentes que rodam sem dispositivo ou simulador                                                                  |
@@ -95,12 +97,15 @@ cp .env.example .env
 
 ```env
 EXPO_PUBLIC_GITHUB_TOKEN=ghp_seu_token_aqui
+EXPO_PUBLIC_GITLAB_TOKEN=glpat_seu_token_aqui
 ```
 
 > [!NOTE]
 > O prefixo `EXPO_PUBLIC_` é exigido pelo Expo SDK 49+ para expor variáveis ao código do app. O arquivo `.env` já está no `.gitignore`.
 
 Com um token o limite sobe para **5.000 requisições/hora**. O token precisa apenas da permissão padrão de leitura pública (sem escopos adicionais). Crie um em **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**.
+
+O GitLab aplica rate limit por IP para requisições não autenticadas; um Personal Access Token com escopo `read_api` é opcional e apenas eleva esse limite. Ambos os tokens são opcionais — sem eles o app funciona normalmente, apenas com limites menores.
 
 ### Execução
 
@@ -138,39 +143,58 @@ src/
 │       └── issues.tsx          # /repository/:owner/:repo/issues → IssuesScreen
 │
 ├── domain/                     # Núcleo sem dependências externas
-│   ├── entities/               # Repository, Issue e Owner
+│   ├── entities/               # Repository, RepositoryDetails, Issue, IssueLabel, Owner, issueRules
 │   ├── errors/                 # DataAccessError e o guard isRateLimitError
 │   ├── repositories/           # Interfaces dos repositórios (ports)
-│   └── shared/                 # Contratos compartilhados, como Page<T>
+│   └── shared/                 # Page<T>, DataSource (ids), DataSourceSelection,
+│                               #   DataSourcePreferenceStorage
 │
 ├── application/                # Use cases e services independentes de frameworks
 │   ├── repositories/           # SearchRepos, GetRepoDetails e RepoService
 │   └── issues/                 # ListRepoIssues e IssueService
 │
 ├── infrastructure/             # Adapters concretos e configuração de bibliotecas
-│   ├── di/                     # Composition root manual
+│   ├── di/                     # Composition root manual + DataSourceRegistry
+│   │   ├── container.ts                     # Monta os dois stacks e expõe os services
+│   │   ├── DataSourceRegistry.ts            # Record<DataSourceId, { repositories, issues }>
+│   │   └── SourceRouted*Repository.ts       # Ports de domínio que resolvem a fonte ativa
 │   ├── query/                  # Factory e defaults do QueryClient
-│   ├── storage/                # Persistência de tema com AsyncStorage
-│   └── github/
-│       ├── AxiosGitHub*DataSource.ts  # Transporte HTTP e DTOs crus
-│       ├── GitHub*DataSource.ts       # Ports internas das datasources
-│       ├── GitHub*Repository.ts       # Mapeamento e paginação
-│       ├── client.ts                  # Axios, interceptors e ApiError
-│       ├── constants.ts               # Tamanho de página da API
-│       ├── dtos.ts                    # Formatos snake_case do GitHub
+│   ├── storage/                # Persistência de tema e de fonte de dados (AsyncStorage)
+│   ├── github/
+│   │   ├── AxiosGitHub*DataSource.ts  # Transporte HTTP e DTOs crus
+│   │   ├── GitHub*DataSource.ts       # Ports internas das datasources
+│   │   ├── GitHub*Repository.ts       # Mapeamento e paginação
+│   │   ├── client.ts                  # Axios, interceptors e tradução para DataAccessError
+│   │   ├── constants.ts               # Tamanho de página da API
+│   │   ├── dtos.ts                    # Formatos snake_case do GitHub
+│   │   └── mappers.ts                 # DTO → entidade de domínio
+│   └── gitlab/                 # Espelho de github/ para a API do GitLab
+│       ├── AxiosGitLab*DataSource.ts  # Transporte HTTP e DTOs crus
+│       ├── GitLab*DataSource.ts       # Ports internas das datasources
+│       ├── GitLab*Repository.ts       # Mapeamento e paginação
+│       ├── client.ts                  # Axios, interceptors (429 → rateLimit)
+│       ├── constants.ts               # Tamanho de página e base web
+│       ├── dtos.ts                    # Formatos do GitLab, incluindo GitLabPageDto
+│       ├── pageHeaders.ts             # Lê x-total / x-next-page da resposta
 │       └── mappers.ts                 # DTO → entidade de domínio
 │
 ├── presentation/               # UI e integração com frameworks de apresentação
 │   ├── repositories/
-│   │   ├── components/         # RepositoryCard, RepositoryCardSkeleton
+│   │   ├── components/         # RepositoryCard, SearchContent, RepositoryDetailContent…
 │   │   ├── hooks/              # useSearchRepos, useRepoDetails
 │   │   └── screens/            # SearchScreen, RepositoryDetailScreen (+ __tests__)
 │   ├── issues/
+│   │   ├── components/         # IssueCard, IssueSkeleton, IssuesEmptyState
 │   │   ├── hooks/              # useRepoIssues
-│   │   └── screens/            # IssuesScreen (+ __tests__)
-│   ├── github/                 # Estados de erro e navegação compartilhados
-│   ├── shared/                 # query keys, formatação e useDebounce
-│   ├── di/                     # ApplicationProvider e QueryProvider
+│   │   ├── screens/            # IssuesScreen (+ __tests__)
+│   │   └── utils/              # labelColorToTone
+│   ├── shared/
+│   │   ├── components/         # DataAccessErrorState, DataSourceToggle
+│   │   ├── navigation/         # getStackScreenOptions
+│   │   ├── hooks/              # useDebounce
+│   │   ├── queryKeys.ts        # Chaves escopadas por fonte de dados
+│   │   └── formatCount.ts
+│   ├── di/                     # ApplicationProvider, QueryProvider, DataSourceProvider
 │   └── __test-utils__/         # renderWithProviders
 │
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
@@ -201,9 +225,8 @@ adicionar uma nova feature significa criar uma pasta sem alterar as existentes.
 src/presentation/
 ├── repositories/     # busca, detalhe, componentes e hooks de repositório
 ├── issues/           # listagem, componentes e hooks de issues
-├── github/           # apresentação compartilhada para recursos do GitHub
-├── shared/           # utilitários transversais exclusivos da apresentação
-└── di/               # providers de serviços e server state
+├── shared/           # utilitários, componentes e navegação transversais à apresentação
+└── di/               # providers de serviços, server state e fonte de dados
 ```
 
 Os hooks resolvem `RepoService` e `IssueService` pelo `ApplicationProvider`, evitando imports de
@@ -215,8 +238,8 @@ Query também vive em `presentation/`, mantendo as rotas do Expo Router como wra
 
 Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
 TanStack Query ou qualquer outra dependência externa. Os formatos retornados pelo GitHub permanecem
-em `src/infrastructure/github/dtos.ts` e são convertidos para entidades por mappers na borda da
-aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
+em `src/infrastructure/github/dtos.ts`, os do GitLab em `src/infrastructure/gitlab/dtos.ts`, e
+ambos são convertidos para as mesmas entidades por mappers na borda da aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
 repository fazem mapeamento e paginação, enquanto o use case de issues mantém o filtro e a
 repaginação de pull requests. Assim, particularidades da API não vazam para telas e componentes.
 Veja o [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
@@ -248,6 +271,22 @@ HTTP para esse vocabulário no interceptor, de modo que códigos 403, 404 e 429 
 `infrastructure/github`. Telas e query client dependem do guard de domínio, e renomear um `kind`
 passa a quebrar no `type-check`. Veja o
 [ADR-005](docs/decisions/005-domain-owned-error-contract.md).
+
+### Fontes de dados alternáveis em tempo de execução
+
+O domínio declara o vocabulário de fonte em `domain/shared/`: os ids (`DataSourceId`), o observável
+`DataSourceSelection` e a porta `DataSourcePreferenceStorage`. Cada provider tem sua própria pasta
+de infraestrutura (`infrastructure/github` e `infrastructure/gitlab`) com client, DTOs, datasources
+e adapters — as diferenças de campo, paginação e vocabulário morrem ali.
+
+A troca é **uma única decisão em um único lugar**: o composition root monta os dois stacks em um
+`DataSourceRegistry` e entrega à aplicação os adapters `SourceRouted*Repository`, que resolvem
+`registry[fonteAtiva()]` a cada chamada. Use cases, services, hooks e telas não sabem que existe
+uma segunda fonte, e o compilador acusa a entrada faltante quando um novo id é adicionado. O
+`DataSourceProvider` expõe a seleção via `useSyncExternalStore` e persiste a preferência; as chaves
+do TanStack Query carregam a fonte como escopo, então trocar dispara um fetch novo com os estados
+de loading normais e mantém o cache da fonte anterior para a volta instantânea. Veja o
+[ADR-006](docs/decisions/006-runtime-switchable-data-sources.md).
 
 ### Design System como módulo fechado
 
@@ -282,7 +321,7 @@ Todos leem tokens via `useTheme()` — zero valores hex fixos ou estilos inline 
 
 ### Tratamento de erros e rate limit
 
-Todos os erros do Axios são normalizados em `ApiError` (status, message, `isRateLimit`). O flag `isRateLimit` (HTTP 403 e 429) desabilita retentativas automáticas no `QueryClient` raiz e exibe um estado de erro dedicado em cada tela, explicando o limite e sugerindo adicionar `EXPO_PUBLIC_GITHUB_TOKEN`. Erros de rede genéricos recebem um botão de nova tentativa que re-executa a query falha.
+Cada client Axios normaliza os erros da sua fonte em `DataAccessError`, o contrato de domínio com o `kind` `rateLimit`, `notFound`, `network` ou `unknown` — o GitHub mapeia 403 e 429 para `rateLimit`, o GitLab apenas 429 (no GitLab, 403 é falha de autorização). O guard `isRateLimitError` desabilita retentativas automáticas no `QueryClient` raiz e exibe um estado de erro dedicado em cada tela, sugerindo configurar um token no `.env`. Erros genéricos recebem um botão de nova tentativa que re-executa a query falha. Códigos HTTP não existem fora de `infrastructure/`.
 
 ---
 
