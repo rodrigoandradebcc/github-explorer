@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
-import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
+import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import type { Repository } from '@/domain/entities/Repository';
 
@@ -68,19 +68,19 @@ beforeEach(() => {
 
 describe('SearchScreen', () => {
   it('renders the search input', () => {
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     expect(screen.getByTestId('search-input')).toBeTruthy();
   });
 
   it('shows the empty prompt when no query is typed', () => {
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     expect(screen.getByTestId('empty-prompt')).toBeTruthy();
   });
 
   it('shows skeletons during initial loading', async () => {
     idleHook({ isLoading: true, data: undefined });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
 
     // Simulate typing to set a debouncedQuery — but since debounce is 500ms
     // and loading=true, after the debounce fires the skeletons should appear.
@@ -102,7 +102,7 @@ describe('SearchScreen', () => {
       },
     });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     fireEvent.changeText(screen.getByTestId('search-input'), 'react');
 
     await waitFor(() => {
@@ -115,7 +115,7 @@ describe('SearchScreen', () => {
       data: { pages: [{ total: 0, nextPage: null, items: [] }], pageParams: [1] },
     });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     fireEvent.changeText(screen.getByTestId('search-input'), 'xyznothing123');
 
     await waitFor(() => {
@@ -127,7 +127,7 @@ describe('SearchScreen', () => {
     const rateLimitErr = Object.assign(new Error('rate limit exceeded'), { isRateLimit: true });
     idleHook({ isError: true, error: rateLimitErr });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     fireEvent.changeText(screen.getByTestId('search-input'), 'react');
 
     await waitFor(() => {
@@ -140,7 +140,7 @@ describe('SearchScreen', () => {
     const genericErr = new Error('Network Error');
     idleHook({ isError: true, error: genericErr });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     fireEvent.changeText(screen.getByTestId('search-input'), 'react');
 
     await waitFor(() => {
@@ -153,7 +153,7 @@ describe('SearchScreen', () => {
     const refetch = jest.fn();
     idleHook({ isError: true, error: new Error('fail'), refetch });
 
-    renderWithTheme(<SearchScreen />);
+    renderWithProviders(<SearchScreen />);
     fireEvent.changeText(screen.getByTestId('search-input'), 'react');
 
     await waitFor(() => screen.getByText('Tentar novamente'));

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react-native';
 import React from 'react';
 
-import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
+import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useRepoIssues } from '@/presentation/issues/hooks/useRepoIssues';
 import type { Issue } from '@/domain/entities/Issue';
 
@@ -67,13 +67,13 @@ beforeEach(() => {
 describe('IssuesScreen', () => {
   it('shows skeleton while loading', () => {
     withData({ isLoading: true });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-skeleton')).toBeTruthy();
   });
 
   it('shows generic error with retry button', () => {
     withData({ isError: true, error: new Error('Network error') });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-error')).toBeTruthy();
     expect(screen.getByTestId('issues-retry-button')).toBeTruthy();
   });
@@ -83,7 +83,7 @@ describe('IssuesScreen', () => {
       isError: true,
       error: Object.assign(new Error('rate limit exceeded'), { isRateLimit: true }),
     });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-error')).toBeTruthy();
     expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();
     expect(screen.queryByTestId('issues-retry-button')).toBeNull();
@@ -93,7 +93,7 @@ describe('IssuesScreen', () => {
     withData({
       data: { pages: [{ items: [], total: null, nextPage: null }], pageParams: [1] },
     });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-empty')).toBeTruthy();
   });
 
@@ -105,7 +105,7 @@ describe('IssuesScreen', () => {
     withData({
       data: { pages: [{ items: issues, total: null, nextPage: null }], pageParams: [1] },
     });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-list')).toBeTruthy();
     expect(screen.getByText('Fix memory leak in useEffect')).toBeTruthy();
     expect(screen.getByText('Add TypeScript support')).toBeTruthy();
@@ -124,7 +124,7 @@ describe('IssuesScreen', () => {
     withData({
       data: { pages: [{ items: issues, total: null, nextPage: null }], pageParams: [1] },
     });
-    renderWithTheme(<IssuesScreen />);
+    renderWithProviders(<IssuesScreen />);
     expect(screen.getByText('bug')).toBeTruthy();
     expect(screen.getByText('good first issue')).toBeTruthy();
   });

@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react-native';
 import React from 'react';
 
-import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
+import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 import type { RepositoryDetails } from '@/domain/entities/Repository';
 
@@ -74,14 +74,14 @@ beforeEach(() => {
 describe('RepositoryDetailScreen', () => {
   it('does not render content cards while loading', () => {
     withData({ isLoading: true });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.queryByTestId('repo-detail-header')).toBeNull();
     expect(screen.queryByTestId('repo-detail-stats')).toBeNull();
   });
 
   it('shows generic error with retry button', () => {
     withData({ isError: true, error: new Error('Network error') });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.getByTestId('detail-error')).toBeTruthy();
     expect(screen.getByTestId('detail-retry-button')).toBeTruthy();
   });
@@ -89,7 +89,7 @@ describe('RepositoryDetailScreen', () => {
   it('calls refetch when retry button is pressed', () => {
     const refetch = jest.fn();
     withData({ isError: true, error: new Error('fail'), refetch });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     fireEvent.press(screen.getByTestId('detail-retry-button'));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
@@ -99,7 +99,7 @@ describe('RepositoryDetailScreen', () => {
       isError: true,
       error: Object.assign(new Error('rate limit'), { isRateLimit: true }),
     });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.getByTestId('detail-error')).toBeTruthy();
     expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();
     expect(screen.queryByTestId('detail-retry-button')).toBeNull();
@@ -107,7 +107,7 @@ describe('RepositoryDetailScreen', () => {
 
   it('renders repository header and stats when data loads', () => {
     withData({ data: makeDetail() });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.getByTestId('repo-detail-header')).toBeTruthy();
     expect(screen.getByTestId('repo-detail-stats')).toBeTruthy();
     expect(screen.getByText('react')).toBeTruthy();
@@ -117,13 +117,13 @@ describe('RepositoryDetailScreen', () => {
 
   it('omits description when null', () => {
     withData({ data: makeDetail({ description: null }) });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     expect(screen.queryByText('A declarative UI library')).toBeNull();
   });
 
   it('navigates to issues when "Ver Issues" is pressed', () => {
     withData({ data: makeDetail() });
-    renderWithTheme(<RepositoryDetailScreen />);
+    renderWithProviders(<RepositoryDetailScreen />);
     fireEvent.press(screen.getByTestId('view-issues-button'));
     expect(mockPush).toHaveBeenCalledWith('/repository/facebook/react/issues');
   });
