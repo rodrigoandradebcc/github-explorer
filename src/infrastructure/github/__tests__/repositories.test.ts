@@ -1,17 +1,24 @@
-import { apiClient } from '../client';
 import type {
   GitHubIssueDto,
   GitHubRepositoryDetailsDto,
   GitHubSearchRepositoriesResponseDto,
 } from '../dtos';
+import type { GitHubIssueDataSource } from '../GitHubIssueDataSource';
 import { GitHubIssueRepository } from '../GitHubIssueRepository';
+import type { GitHubRepositoryDataSource } from '../GitHubRepositoryDataSource';
 import { GitHubRepositoryRepository } from '../GitHubRepositoryRepository';
 
-jest.mock('../client', () => ({ apiClient: { get: jest.fn() } }));
+function fakeRepositoryDataSource(
+  overrides: Partial<GitHubRepositoryDataSource> = {},
+): GitHubRepositoryDataSource {
+  return { searchRepositories: jest.fn(), getRepository: jest.fn(), ...overrides };
+}
 
-const mockGet = apiClient.get as jest.Mock;
-const repositoryRepository = new GitHubRepositoryRepository();
-const issueRepository = new GitHubIssueRepository();
+function fakeIssueDataSource(
+  overrides: Partial<GitHubIssueDataSource> = {},
+): GitHubIssueDataSource {
+  return { listOpenIssues: jest.fn(), ...overrides };
+}
 
 const mockRepository: GitHubRepositoryDetailsDto = {
   id: 1,
@@ -58,22 +65,20 @@ const mockIssue: GitHubIssueDto = {
   html_url: 'https://github.com/facebook/react/issues/42',
 };
 
-beforeEach(() => jest.clearAllMocks());
-
 describe('GitHubRepositoryRepository', () => {
-  it('searches repositories and maps the response to the domain', async () => {
+  it('maps a full middle search page and advances pagination', async () => {
     const response: GitHubSearchRepositoriesResponseDto = {
       total_count: 31,
       incomplete_results: false,
       items: Array.from({ length: 30 }, (_, id) => ({ ...mockRepository, id })),
     };
-    mockGet.mockResolvedValueOnce({ data: response });
-
-    const result = await repositoryRepository.search('react', 1);
-
-    expect(mockGet).toHaveBeenCalledWith('/search/repositories', {
-      params: { q: 'react', page: 1, per_page: 30 },
+    const dataSource = fakeRepositoryDataSource({
+      searchRepositories: jest.fn().mockResolvedValue(response),
     });
+
+    const result = await new GitHubRepositoryRepository(dataSource).search('react', 1);
+
+    expect(dataSource.searchRepositories).toHaveBeenCalledWith('react', 1);
     expect(result).toMatchObject({ total: 31, nextPage: 2 });
     expect(result.items[0]).toMatchObject({
       fullName: 'facebook/react',
@@ -83,42 +88,67 @@ describe('GitHubRepositoryRepository', () => {
     expect(result.items[0]?.createdAt).toEqual(new Date('2013-05-24T00:00:00Z'));
   });
 
-  it('stops after the last page in the GitHub search result window', async () => {
-    mockGet.mockResolvedValueOnce({
-      data: {
+  it('stops at the last page supported by the GitHub search result window', async () => {
+    const dataSource = fakeRepositoryDataSource({
+      searchRepositories: jest.fn().mockResolvedValue({
         total_count: 1500,
         incomplete_results: false,
-        items: Array.from({ length: 10 }, (_, id) => ({ ...mockRepository, id })),
-      },
+        items: Array.from({ length: 30 }, (_, id) => ({ ...mockRepository, id })),
+      }),
     });
 
-    const result = await repositoryRepository.search('react', 34);
+    const result = await new GitHubRepositoryRepository(dataSource).search('react', 34);
+
+    expect(result.nextPage).toBeNull();
+  });
+
+  it('stops when the search response contains a partial page', async () => {
+    const dataSource = fakeRepositoryDataSource({
+      searchRepositories: jest.fn().mockResolvedValue({
+        total_count: 100,
+        incomplete_results: false,
+        items: Array.from({ length: 10 }, (_, id) => ({ ...mockRepository, id })),
+      }),
+    });
+
+    const result = await new GitHubRepositoryRepository(dataSource).search('react', 2);
 
     expect(result.nextPage).toBeNull();
   });
 
   it('loads repository details and maps its specific fields', async () => {
-    mockGet.mockResolvedValueOnce({ data: mockRepository });
+    const dataSource = fakeRepositoryDataSource({
+      getRepository: jest.fn().mockResolvedValue(mockRepository),
+    });
 
-    const result = await repositoryRepository.findByOwnerAndName('facebook', 'react');
+    const result = await new GitHubRepositoryRepository(dataSource).findByOwnerAndName(
+      'facebook',
+      'react',
+    );
 
-    expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react');
+    expect(dataSource.getRepository).toHaveBeenCalledWith('facebook', 'react');
     expect(result).toMatchObject({ watchersCount: 200000, defaultBranch: 'main' });
     expect(result.license).toEqual({ key: 'mit', name: 'MIT License', spdxId: 'MIT' });
   });
 });
 
 describe('GitHubIssueRepository', () => {
-  it('loads and maps issues and pull requests without applying business rules', async () => {
-    mockGet.mockResolvedValueOnce({
-      data: [mockIssue, { ...mockIssue, id: 43, pull_request: { url: 'https://example.com/pr' } }],
+  it('maps issues and pull requests without applying application rules', async () => {
+    const dataSource = fakeIssueDataSource({
+      listOpenIssues: jest
+        .fn()
+        .mockResolvedValue([
+          mockIssue,
+          { ...mockIssue, id: 43, pull_request: { url: 'https://example.com/pr' } },
+        ]),
     });
 
-    const result = await issueRepository.findOpenByRepository('facebook', 'react');
+    const result = await new GitHubIssueRepository(dataSource).findOpenByRepository(
+      'facebook',
+      'react',
+    );
 
-    expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react/issues', {
-      params: { state: 'open', page: 1, per_page: 30 },
-    });
+    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 1);
     expect(result.items).toHaveLength(2);
     expect(result.items[0]).toMatchObject({
       id: 42,
@@ -129,32 +159,20 @@ describe('GitHubIssueRepository', () => {
     expect(result.items[1]).toMatchObject({ id: 43, isPullRequest: true });
   });
 
-  it('uses the unfiltered API page size to determine the next page', async () => {
-    mockGet.mockResolvedValueOnce({
-      data: Array.from({ length: 30 }, (_, id) => ({ ...mockIssue, id })),
+  it('uses the raw datasource page size to determine the next page', async () => {
+    const dataSource = fakeIssueDataSource({
+      listOpenIssues: jest
+        .fn()
+        .mockResolvedValue(Array.from({ length: 30 }, (_, id) => ({ ...mockIssue, id }))),
     });
 
-    const result = await issueRepository.findOpenByRepository('facebook', 'react', 3);
+    const result = await new GitHubIssueRepository(dataSource).findOpenByRepository(
+      'facebook',
+      'react',
+      3,
+    );
 
     expect(result.nextPage).toBe(4);
-    expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react/issues', {
-      params: { state: 'open', page: 3, per_page: 30 },
-    });
-  });
-
-  it('returns a page containing only pull requests without fetching another page', async () => {
-    const pullRequests = Array.from({ length: 30 }, (_, id) => ({
-      ...mockIssue,
-      id,
-      pull_request: { url: `https://example.com/pr/${id}` },
-    }));
-    mockGet.mockResolvedValueOnce({ data: pullRequests });
-
-    const result = await issueRepository.findOpenByRepository('facebook', 'react', 2);
-
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(result.items).toHaveLength(30);
-    expect(result.items.every((item) => item.isPullRequest)).toBe(true);
-    expect(result.nextPage).toBe(3);
+    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 3);
   });
 });

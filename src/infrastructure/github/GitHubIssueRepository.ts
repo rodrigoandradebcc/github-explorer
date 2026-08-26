@@ -1,15 +1,14 @@
 import type { IssueRepository } from '@/domain/repositories/IssueRepository';
 
-import { apiClient } from './client';
-import type { GitHubIssueDto } from './dtos';
-import { GITHUB_PAGE_SIZE } from './GitHubRepositoryRepository';
+import { GITHUB_PAGE_SIZE } from './constants';
+import type { GitHubIssueDataSource } from './GitHubIssueDataSource';
 import { mapIssue } from './mappers';
 
 export class GitHubIssueRepository implements IssueRepository {
+  constructor(private readonly dataSource: GitHubIssueDataSource) {}
+
   async findOpenByRepository(owner: string, repository: string, page = 1) {
-    const { data } = await apiClient.get<GitHubIssueDto[]>(`/repos/${owner}/${repository}/issues`, {
-      params: { state: 'open', page, per_page: GITHUB_PAGE_SIZE },
-    });
+    const data = await this.dataSource.listOpenIssues(owner, repository, page);
 
     return {
       items: data.map(mapIssue),
@@ -18,5 +17,3 @@ export class GitHubIssueRepository implements IssueRepository {
     };
   }
 }
-
-export const issueRepository = new GitHubIssueRepository();

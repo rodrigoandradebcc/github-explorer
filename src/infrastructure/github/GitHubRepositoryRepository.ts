@@ -1,18 +1,16 @@
 import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
 
-import { apiClient } from './client';
-import type { GitHubRepositoryDetailsDto, GitHubSearchRepositoriesResponseDto } from './dtos';
+import { GITHUB_PAGE_SIZE } from './constants';
+import type { GitHubRepositoryDataSource } from './GitHubRepositoryDataSource';
 import { mapRepository, mapRepositoryDetails } from './mappers';
 
-export const GITHUB_PAGE_SIZE = 30;
 const GITHUB_SEARCH_RESULT_LIMIT = 1000;
 
 export class GitHubRepositoryRepository implements RepositoryRepository {
+  constructor(private readonly dataSource: GitHubRepositoryDataSource) {}
+
   async search(query: string, page = 1) {
-    const { data } = await apiClient.get<GitHubSearchRepositoriesResponseDto>(
-      '/search/repositories',
-      { params: { q: query, page, per_page: GITHUB_PAGE_SIZE } },
-    );
+    const data = await this.dataSource.searchRepositories(query, page);
     const searchableTotal = Math.min(data.total_count, GITHUB_SEARCH_RESULT_LIMIT);
     const lastSupportedPage = Math.ceil(GITHUB_SEARCH_RESULT_LIMIT / GITHUB_PAGE_SIZE);
     const loadedThroughThisPage = page * GITHUB_PAGE_SIZE;
@@ -29,9 +27,7 @@ export class GitHubRepositoryRepository implements RepositoryRepository {
   }
 
   async findByOwnerAndName(owner: string, name: string) {
-    const { data } = await apiClient.get<GitHubRepositoryDetailsDto>(`/repos/${owner}/${name}`);
+    const data = await this.dataSource.getRepository(owner, name);
     return mapRepositoryDetails(data);
   }
 }
-
-export const repositoryRepository = new GitHubRepositoryRepository();
