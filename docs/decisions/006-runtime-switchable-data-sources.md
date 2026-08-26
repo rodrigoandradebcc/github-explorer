@@ -106,11 +106,17 @@ provider-specific patch.
 - Query cache entries are namespaced per source, so switching back is instant within `staleTime`.
 - Presentation no longer has a `github/` folder; its shared error state and navigation options moved
   to `presentation/shared/`, and the rate-limit copy is source-neutral.
-- `encodeURIComponent` on route segments makes the pushed string correct, but expo-router decodes
-  path segments before matching, so a GitLab namespace containing `/` (a nested subgroup such as
-  `grupo/subgrupo`) yields an extra path segment and does not match `[owner]/[repo]`. Top-level
-  namespaces — what `order_by=star_count` search returns in practice — work correctly. This was not
-  worked around: a custom separator or double-encoding would leak source-specific knowledge into
-  presentation, which the requirement forbids.
+- `encodeURIComponent` on route segments makes the pushed string correct, and expo-router matches
+  that string while it is still encoded, so a GitLab namespace containing `/` (a nested subgroup
+  such as `grupo/subgrupo`) does reach `[owner]/[repo]` with `owner === 'grupo/subgrupo'`. In
+  expo-router 6.0.23, `getUrlWithReactNavigationConcessions` derives the path to match from
+  `new URL(path, 'file:').pathname`, which preserves `%2F`; `configRegExp` compiles a `:param`
+  segment to `([^/]+\/)`, which `grupo%2Fsubgrupo/` satisfies as one segment; and the match result
+  is decoded only afterwards, by `safelyDecodeURIComponent` in `getStateFromPath`, with
+  `useLocalSearchParams` decoding once more (idempotent for an already-decoded value). This was
+  verified by reading the router's matching code and driving its `getStateFromPath` with the app's
+  route patterns, not by an end-to-end run on a device. No custom separator or double-encoding was
+  added, and none is needed: either would leak source-specific knowledge into presentation, which
+  the requirement forbids.
 - The `github` prefix in the persisted storage keys (`@github_explorer/*`) and the package name
   remain, so existing preferences keep resolving.

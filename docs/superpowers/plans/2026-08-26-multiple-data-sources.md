@@ -2304,6 +2304,8 @@ with the import `import { DataSourceToggle } from '@/presentation/shared/compone
 (The existing detail-screen test expecting `'/repository/facebook/react/issues'` still passes — encoding is the identity for those values.)
 
 > **Known limitation — do not claim otherwise.** `encodeURIComponent` makes the pushed *string* correct, but expo-router decodes path segments before matching, so a GitLab namespace containing `/` (nested subgroup, e.g. `grupo/subgrupo`) produces an extra path segment and will not match `[owner]/[repo]`. Top-level namespaces — which is what `order_by=star_count` search returns in practice (`gitlab-org/gitlab`) — work correctly. Do **not** add a custom separator or double-encoding to work around this: both leak source-specific knowledge into presentation, which is exactly what the requirement forbids. Record it in ADR-006 under Consequences as a known limitation with the reason it was not worked around.
+>
+> **Correction (post-implementation, 2026-08-26):** this limitation is not real. expo-router 6.0.23 matches the *still-encoded* path (`getUrlWithReactNavigationConcessions` keeps `%2F`, `configRegExp` compiles `:param` to `([^/]+\/)`) and decodes only after the match, so `/repository/grupo%2Fsubgrupo/projeto` resolves to `[owner]/[repo]` with `owner === 'grupo/subgrupo'`. The instruction not to add a separator or double-encoding still stands. See ADR-006 Consequences.
 
 - [ ] **Step 4: Run the full gates**
 

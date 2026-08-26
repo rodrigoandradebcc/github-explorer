@@ -29,7 +29,7 @@ export function DataSourceToggle() {
           <Pressable
             key={id}
             testID={`data-source-option-${id}`}
-            accessibilityRole="button"
+            accessibilityRole="tab"
             accessibilityLabel={`Usar fonte ${SOURCE_LABELS[id]}`}
             accessibilityState={{ selected }}
             onPress={() => setSource(id)}

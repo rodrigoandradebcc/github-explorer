@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 
 import { Box, Input, useTheme } from '@/design-system';
+import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
 import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
 import type { Repository } from '@/domain/entities/Repository';
 
@@ -56,10 +57,13 @@ export function SearchContent({
 }: SearchContentProps) {
   const { colors, spacing } = useTheme();
 
+  // Repository ids are per-source integers and collide across sources, so the seen-set has to
+  // reset on a source switch as well as on a new query. `source` is an opaque reset key here.
+  const source = useDataSourceScope();
   const animatedIds = useRef(new Set<number>());
   useEffect(() => {
     animatedIds.current.clear();
-  }, [query]);
+  }, [query, source]);
 
   const searchInput = (
     <Box paddingHorizontal="md" paddingTop="sm" paddingBottom="xs">
