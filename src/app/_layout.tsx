@@ -1,23 +1,10 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from '@/design-system';
-import { ApiError } from '@/application';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      retry: (failureCount, error) => {
-        if (error instanceof ApiError && error.isRateLimit) return false;
-        return failureCount < 1;
-      },
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+import { ApplicationProvider } from '@/presentation/di/ApplicationProvider';
+import { QueryProvider } from '@/presentation/di/QueryProvider';
 
 function ThemedStack() {
   const { colors, mode } = useTheme();
@@ -39,10 +26,12 @@ function ThemedStack() {
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ThemedStack />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ApplicationProvider>
+      <QueryProvider>
+        <ThemeProvider>
+          <ThemedStack />
+        </ThemeProvider>
+      </QueryProvider>
+    </ApplicationProvider>
   );
 }
