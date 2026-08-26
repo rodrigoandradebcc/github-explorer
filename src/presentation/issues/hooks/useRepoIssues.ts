@@ -1,13 +1,15 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { useIssueService } from '@/presentation/di/ApplicationProvider';
+import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
 export function useRepoIssues(owner: string, repo: string) {
   const issues = useIssueService();
+  const scope = useDataSourceScope();
 
   return useInfiniteQuery({
-    queryKey: queryKeys.repositories.issues(owner, repo),
+    queryKey: queryKeys.repositories.issues(scope, owner, repo),
     queryFn: ({ pageParam }) => issues.listOpen(owner, repo, pageParam),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,

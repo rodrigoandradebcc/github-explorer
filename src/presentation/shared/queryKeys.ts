@@ -1,7 +1,12 @@
+import type { DataSourceId } from '@/domain/shared/DataSource';
+
 export const queryKeys = {
   repositories: {
-    search: (query: string) => ['repositories', 'search', query] as const,
-    detail: (owner: string, repo: string) => ['repositories', 'detail', owner, repo] as const,
-    issues: (owner: string, repo: string) => ['repositories', 'issues', owner, repo] as const,
+    search: (scope: DataSourceId, query: string) =>
+      ['repositories', scope, 'search', query] as const,
+    detail: (scope: DataSourceId, owner: string, repo: string) =>
+      ['repositories', scope, 'detail', owner, repo] as const,
+    issues: (scope: DataSourceId, owner: string, repo: string) =>
+      ['repositories', scope, 'issues', owner, repo] as const,
   },
 } as const;
