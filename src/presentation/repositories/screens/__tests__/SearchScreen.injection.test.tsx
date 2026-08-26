@@ -76,10 +76,12 @@ describe('SearchScreen service injection', () => {
     });
     fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
     await waitFor(() => expect(screen.getByText('injected-repository')).toBeTruthy());
+    expect(search).toHaveBeenCalledTimes(1);
 
     fireEvent.press(screen.getByTestId('data-source-option-gitlab'));
 
     await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+    expect(search).toHaveBeenNthCalledWith(2, 'injected', 1);
   });
 
   it('URL-encodes route segments when opening a repository', async () => {
