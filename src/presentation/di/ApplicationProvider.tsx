@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useMemo } from 'react';
 
+import { type IssueService, type RepoService } from '@/application';
 import {
   issueService as defaultIssueService,
   repoService as defaultRepoService,
-  type IssueService,
-  type RepoService,
-} from '@/application';
+} from '@/infrastructure/di';
 
 export interface ApplicationServices {
   repoService: RepoService;

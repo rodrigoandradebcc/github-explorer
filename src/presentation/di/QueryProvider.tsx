@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-import { ApiError } from '@/application';
+import { ApiError } from '@/infrastructure/github/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {

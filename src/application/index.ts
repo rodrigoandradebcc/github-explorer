@@ -1,4 +1,3 @@
-export { ApiError, issueService, repoService } from './container';
 export { IssueService } from './issues/IssueService';
 export { ListRepoIssuesUseCase, type ListRepoIssuesInput } from './issues/ListRepoIssuesUseCase';
 export {
