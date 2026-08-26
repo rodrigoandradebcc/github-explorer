@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { repoService } from '@/application';
-import { queryKeys } from '@/services/queryKeys';
+import { queryKeys } from '@/presentation/shared/queryKeys';
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 

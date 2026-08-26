@@ -4,7 +4,7 @@ import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated'
 
 import { Avatar, Box, Button, Card, Heading, Text, useTheme } from '@/design-system';
 import type { RepositoryDetails } from '@/domain/entities/Repository';
-import { formatCount } from '@/utils/formatCount';
+import { formatCount } from '@/presentation/shared/formatCount';
 
 import { RepositoryStatItem } from './RepositoryStatItem';
 

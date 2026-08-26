@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 
 import { Box, Input, useTheme } from '@/design-system';
-import { GithubApiErrorState } from '@/features/github/components/GithubApiErrorState';
+import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
 import type { Repository } from '@/domain/entities/Repository';
 
 import { RepositoryCard } from './RepositoryCard';

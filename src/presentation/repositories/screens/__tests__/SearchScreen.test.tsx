@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
-import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
+import { useSearchRepositories } from '@/presentation/repositories/hooks/useSearchRepositories';
 import { ApiError } from '@/application';
 import type { Repository } from '@/domain/entities/Repository';
 
@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-jest.mock('@/features/repositories/hooks/useSearchRepositories');
+jest.mock('@/presentation/repositories/hooks/useSearchRepositories');
 
 const mockHook = useSearchRepositories as jest.MockedFunction<typeof useSearchRepositories>;
 

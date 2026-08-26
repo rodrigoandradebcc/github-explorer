@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { issueService } from '@/application';
-import { queryKeys } from '@/services/queryKeys';
+import { queryKeys } from '@/presentation/shared/queryKeys';
 
 export function useRepositoryIssues(owner: string, repo: string) {
   return useInfiniteQuery({

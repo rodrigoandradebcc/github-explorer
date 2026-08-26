@@ -1,3 +1,3 @@
-import { SearchScreen } from '@/features/repositories/screens/SearchScreen';
+import { SearchScreen } from '@/presentation/repositories/screens/SearchScreen';
 
 export default SearchScreen;

@@ -4,8 +4,8 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, GlassView, Heading, useTheme } from '@/design-system';
-import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useSearchRepositories } from '@/presentation/repositories/hooks/useSearchRepositories';
+import { useDebounce } from '@/presentation/shared/hooks/useDebounce';
 import type { Repository } from '@/domain/entities/Repository';
 import { ApiError } from '@/application';
 

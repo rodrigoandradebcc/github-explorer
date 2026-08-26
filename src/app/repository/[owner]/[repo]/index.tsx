@@ -1,3 +1,3 @@
-import { RepositoryDetailScreen } from '@/features/repositories/screens/RepositoryDetailScreen';
+import { RepositoryDetailScreen } from '@/presentation/repositories/screens/RepositoryDetailScreen';
 
 export default RepositoryDetailScreen;

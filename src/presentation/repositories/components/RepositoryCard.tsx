@@ -11,7 +11,7 @@ import Animated, {
 
 import { Avatar, Badge, Box, Card, Heading, Text, useTheme } from '@/design-system';
 import type { Repository } from '@/domain/entities/Repository';
-import { formatCount } from '@/utils/formatCount';
+import { formatCount } from '@/presentation/shared/formatCount';
 
 interface RepositoryCardProps {
   repo: Repository;

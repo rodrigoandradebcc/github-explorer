@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
-import { useRepositoryIssues } from '@/features/issues/hooks/useRepositoryIssues';
+import { useRepositoryIssues } from '@/presentation/issues/hooks/useRepositoryIssues';
 import { ApiError } from '@/application';
 import type { Issue } from '@/domain/entities/Issue';
 
@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-jest.mock('@/features/issues/hooks/useRepositoryIssues');
+jest.mock('@/presentation/issues/hooks/useRepositoryIssues');
 const mockHook = useRepositoryIssues as jest.MockedFunction<typeof useRepositoryIssues>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────

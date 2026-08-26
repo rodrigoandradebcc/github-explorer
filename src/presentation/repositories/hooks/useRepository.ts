@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { repoService } from '@/application';
-import { queryKeys } from '@/services/queryKeys';
+import { queryKeys } from '@/presentation/shared/queryKeys';
 
 export function useRepository(owner: string, repo: string) {
   return useQuery({

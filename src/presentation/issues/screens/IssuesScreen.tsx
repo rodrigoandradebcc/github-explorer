@@ -3,12 +3,12 @@ import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList } from 'react-native';
 
 import { Box, useTheme } from '@/design-system';
-import { GithubApiErrorState } from '@/features/github/components/GithubApiErrorState';
-import { getGithubStackScreenOptions } from '@/features/github/navigation/getGithubStackScreenOptions';
-import { IssueCard } from '@/features/issues/components/IssueCard';
-import { IssuesEmptyState } from '@/features/issues/components/IssuesEmptyState';
-import { IssuesSkeletonList } from '@/features/issues/components/IssuesSkeletonList';
-import { useRepositoryIssues } from '@/features/issues/hooks/useRepositoryIssues';
+import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
+import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
+import { IssueCard } from '@/presentation/issues/components/IssueCard';
+import { IssuesEmptyState } from '@/presentation/issues/components/IssuesEmptyState';
+import { IssuesSkeletonList } from '@/presentation/issues/components/IssuesSkeletonList';
+import { useRepositoryIssues } from '@/presentation/issues/hooks/useRepositoryIssues';
 import type { Issue } from '@/domain/entities/Issue';
 import { ApiError } from '@/application';
 

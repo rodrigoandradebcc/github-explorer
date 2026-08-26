@@ -1,3 +1,3 @@
-import { IssuesScreen } from '@/features/issues/screens/IssuesScreen';
+import { IssuesScreen } from '@/presentation/issues/screens/IssuesScreen';
 
 export default IssuesScreen;
