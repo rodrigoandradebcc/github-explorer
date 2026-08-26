@@ -25,6 +25,11 @@ Infrastructure converts snake_case DTOs to provider-independent, camelCase domai
 Features depend on domain-shaped results. Application-layer orchestration was introduced later in
 [ADR-002](./002-application-layer-use-cases.md).
 
+Within GitHub infrastructure, Axios datasources are limited to paths, request parameters, and raw
+DTOs. Concrete repository adapters receive those datasources through constructors and retain DTO
+mapping and pagination. Pull-request filtering and re-pagination remain application orchestration
+as established by ADR-002.
+
 ## Alternatives considered
 
 ### Move the existing API types into `domain`

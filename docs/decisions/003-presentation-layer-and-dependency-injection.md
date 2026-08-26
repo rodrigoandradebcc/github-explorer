@@ -32,9 +32,10 @@ Production composition uses the existing singleton services as defaults, while c
 partial service overrides for tests. Presentation hooks resolve services through context and retain
 their existing TanStack Query keys and behavior.
 
-Move the production query configuration to a dedicated `QueryProvider` in presentation. Compose
-the application, query, and theme providers from the Expo Router root layout so route modules
-remain framework-required wrappers without application or infrastructure dependencies.
+Keep a dedicated `QueryProvider` in presentation and compose the application, query, and theme
+providers from the Expo Router root layout. [ADR-004](./004-infrastructure-boundaries.md) later
+moved the production QueryClient configuration to an infrastructure factory while retaining the
+React provider in presentation.
 
 ## Alternatives considered
 
@@ -62,6 +63,7 @@ the React Native component lifecycle.
   co-located.
 - Hooks no longer import production service singletons directly.
 - Screen integration tests can exercise real hooks with injected service fakes.
-- Expo Router route files depend only on presentation and the design system.
+- Expo Router route files remain thin; the root layout may import infrastructure only to inject
+  concrete implementations.
 - Provider composition is explicit and uses no additional dependency-injection library.
 - Presentation components must be rendered under `ApplicationProvider` and `QueryClientProvider`.

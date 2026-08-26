@@ -21,10 +21,11 @@ Introduce `src/application` between features and the domain ports. Each operatio
 a class with one public `execute()` method and receives its repository port through the constructor.
 Thin aggregate services group these use cases and form the stable API consumed by hooks.
 
-Use a manual composition root in `application/container.ts` to instantiate adapters, use cases, and
-services. It is the only application file allowed to import infrastructure. Move pull-request
-filtering and the associated re-pagination loop into `ListRepoIssuesUseCase`; infrastructure only
-maps and returns the provider response.
+Use a manual composition root to instantiate adapters, use cases, and services. It was initially
+introduced under application and later moved to `infrastructure/di/container.ts` by
+[ADR-004](./004-infrastructure-boundaries.md), leaving application with no infrastructure imports.
+Move pull-request filtering and the associated re-pagination loop into `ListRepoIssuesUseCase`;
+infrastructure only maps and returns the provider response.
 
 ## Alternatives considered
 
@@ -47,7 +48,7 @@ cases and two adapters. Manual composition is explicit and avoids an unnecessary
 
 ## Consequences
 
-- Features and app code no longer import infrastructure directly.
+- Presentation features no longer import concrete adapters directly.
 - Use cases can be tested without React Query or Axios.
 - Business filtering and re-pagination live in the application layer.
 - Services are intentionally thin today and can compose more use cases without changing hooks.

@@ -142,12 +142,22 @@ src/
 │   ├── repositories/           # Interfaces dos repositórios (ports)
 │   └── shared/                 # Contratos compartilhados, como Page<T>
 │
-├── application/                # Use cases, services e composition root
+├── application/                # Use cases e services independentes de frameworks
 │   ├── repositories/           # SearchRepos, GetRepoDetails e RepoService
-│   ├── issues/                 # ListRepoIssues e IssueService
-│   └── container.ts            # Liga as ports aos adapters concretos
+│   └── issues/                 # ListRepoIssues e IssueService
 │
-├── infrastructure/github/      # DTOs, mappers, Axios e adapters concretos do GitHub
+├── infrastructure/             # Adapters concretos e configuração de bibliotecas
+│   ├── di/                     # Composition root manual
+│   ├── query/                  # Factory e defaults do QueryClient
+│   ├── storage/                # Persistência de tema com AsyncStorage
+│   └── github/
+│       ├── AxiosGitHub*DataSource.ts  # Transporte HTTP e DTOs crus
+│       ├── GitHub*DataSource.ts       # Ports internas das datasources
+│       ├── GitHub*Repository.ts       # Mapeamento e paginação
+│       ├── client.ts                  # Axios, interceptors e ApiError
+│       ├── constants.ts               # Tamanho de página da API
+│       ├── dtos.ts                    # Formatos snake_case do GitHub
+│       └── mappers.ts                 # DTO → entidade de domínio
 │
 ├── presentation/               # UI e integração com frameworks de apresentação
 │   ├── repositories/
@@ -164,7 +174,7 @@ src/
 │
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
 │   ├── tokens/                 # colors, spacing, radius, sizes
-│   ├── theme/                  # ThemeProvider + useTheme (persiste o modo no AsyncStorage)
+│   ├── theme/                  # ThemeProvider + useTheme + porta de persistência
 │   └── components/             # Avatar, Badge, Box, Button, Card, Heading,
 │                               #   Input, Skeleton, Switch, Text
 ```
@@ -200,19 +210,29 @@ Query também vive em `presentation/`, mantendo as rotas do Expo Router como wra
 Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
 TanStack Query ou qualquer outra dependência externa. Os formatos retornados pelo GitHub permanecem
 em `src/infrastructure/github/dtos.ts` e são convertidos para entidades por mappers na borda da
-aplicação. Assim, particularidades da API — incluindo o fato de o endpoint de issues também retornar
-pull requests — não vazam para telas e componentes. Veja o
-[ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
+aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
+repository fazem mapeamento e paginação, enquanto o use case de issues mantém o filtro e a
+repaginação de pull requests. Assim, particularidades da API não vazam para telas e componentes.
+Veja o [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
 
 ### Use cases e services de aplicação
 
 Use cases representam uma operação do sistema e concentram validação e orquestração do domínio por
 meio das interfaces de repositório. Services são fachadas finas que agrupam os use cases de cada
-agregado e oferecem uma superfície estável para os hooks. Apenas o `application/container.ts`
-conhece os adapters concretos: ele injeta as implementações nos use cases e monta os services sem
-uma biblioteca de DI. Assim, React Query continua responsável por cache e estado assíncrono, mas não
-carrega regras de negócio nem conhece infraestrutura. Veja o
+agregado e oferecem uma superfície estável para os hooks. Apenas o composition root em
+`infrastructure/di/container.ts` conhece os adapters concretos: ele injeta as implementações nos use
+cases e monta os services sem uma biblioteca de DI. Assim, React Query continua responsável por
+cache e estado assíncrono, mas não carrega regras de negócio nem conhece infraestrutura. Veja o
 [ADR-002](docs/decisions/002-application-layer-use-cases.md).
+
+### Fronteiras de infraestrutura
+
+Configuração do TanStack Query, montagem de dependências e persistência AsyncStorage ficam em
+`infrastructure/`. O `QueryProvider` e o `ThemeProvider` permanecem responsáveis apenas pela
+integração React; o design system define uma porta de persistência e funciona com implementação
+no-op quando usado isoladamente. Navegação continua em `app/` e `presentation/`, pois rotas e
+aparência de headers são responsabilidades de framework e apresentação. Veja o
+[ADR-004](docs/decisions/004-infrastructure-boundaries.md).
 
 ### Design System como módulo fechado
 
