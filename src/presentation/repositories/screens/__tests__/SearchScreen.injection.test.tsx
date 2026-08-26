@@ -4,6 +4,7 @@ import React from 'react';
 import type { RepoService } from '@/application';
 import type { Repository } from '@/domain/entities/Repository';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
+import { applicationServicesWithRepo } from '@/presentation/di/ApplicationProvider';
 
 import { SearchScreen } from '../SearchScreen';
 
@@ -42,12 +43,14 @@ describe('SearchScreen service injection', () => {
       total: 1,
       nextPage: null,
     });
-    const repoService = {
+    const repositoryService = {
       search,
       details: jest.fn(),
     } as unknown as RepoService;
 
-    renderWithProviders(<SearchScreen />, { services: { repoService } });
+    renderWithProviders(<SearchScreen />, {
+      services: applicationServicesWithRepo(repositoryService),
+    });
     fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
 
     await waitFor(() => {

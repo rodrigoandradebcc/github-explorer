@@ -56,9 +56,7 @@ export function Input({
           minHeight: 44,
         }}
       >
-        {leftIcon !== undefined && (
-          <View style={{ paddingLeft: spacing.sm }}>{leftIcon}</View>
-        )}
+        {leftIcon !== undefined && <View style={{ paddingLeft: spacing.sm }}>{leftIcon}</View>}
         <TextInput
           testID={testID}
           value={value}

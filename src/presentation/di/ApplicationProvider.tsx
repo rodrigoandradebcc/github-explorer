@@ -42,3 +42,7 @@ export function useApplicationServices(): ApplicationServices {
 
 export const useRepoService = () => useApplicationServices().repoService;
 export const useIssueService = () => useApplicationServices().issueService;
+
+export const applicationServicesWithRepo = (
+  service: RepoService,
+): Partial<ApplicationServices> => ({ repoService: service });
