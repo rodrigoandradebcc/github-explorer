@@ -28,7 +28,7 @@ export function RepositoryDetailContent({
             <Box direction="column" gap="sm">
               <Box direction="row" align="center" gap="md">
                 <Avatar
-                  uri={repository.owner.avatarUrl}
+                  uri={repository.owner.avatarUrl ?? undefined}
                   fallback={repository.owner.login}
                   size="lg"
                 />
@@ -61,12 +61,14 @@ export function RepositoryDetailContent({
                 label="Forks"
                 iconColor={colors.success}
               />
-              <RepositoryStatItem
-                icon="eye-outline"
-                value={formatCount(repository.watchersCount)}
-                label="Watchers"
-                iconColor={colors.info}
-              />
+              {repository.watchersCount !== null && (
+                <RepositoryStatItem
+                  icon="eye-outline"
+                  value={formatCount(repository.watchersCount)}
+                  label="Watchers"
+                  iconColor={colors.info}
+                />
+              )}
               {repository.language !== null && (
                 <RepositoryStatItem
                   icon="code-slash-outline"

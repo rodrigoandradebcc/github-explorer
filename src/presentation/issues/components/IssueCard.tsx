@@ -46,7 +46,11 @@ export function IssueCard({ issue, index = 0 }: IssueCardProps) {
 
           <Box direction="row" align="center" justify="space-between">
             <Box direction="row" align="center" gap="xs" flex={1}>
-              <Avatar uri={issue.author.avatarUrl} fallback={issue.author.login} size="sm" />
+              <Avatar
+                uri={issue.author.avatarUrl ?? undefined}
+                fallback={issue.author.login}
+                size="sm"
+              />
               <Text size="xs" tone="muted" numberOfLines={1}>
                 {issue.author.login} ·{' '}
                 {formatDistanceToNow(issue.createdAt, { addSuffix: true, locale: ptBR })}

@@ -128,4 +128,10 @@ describe('RepositoryDetailScreen', () => {
     fireEvent.press(screen.getByTestId('view-issues-button'));
     expect(mockPush).toHaveBeenCalledWith('/repository/facebook/react/issues');
   });
+
+  it('omits the watchers stat when the source does not provide it', () => {
+    withData({ data: makeDetail({ watchersCount: null }) });
+    renderWithProviders(<RepositoryDetailScreen />);
+    expect(screen.queryByText('Watchers')).toBeNull();
+  });
 });

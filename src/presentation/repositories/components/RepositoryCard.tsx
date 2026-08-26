@@ -82,7 +82,11 @@ export function RepositoryCard({
           <Box direction="column" gap="xs">
             <Box direction="row" align="center" justify="space-between">
               <Box direction="row" align="center" gap="xs">
-                <Avatar uri={repo.owner.avatarUrl} fallback={repo.owner.login} size="sm" />
+                <Avatar
+                  uri={repo.owner.avatarUrl ?? undefined}
+                  fallback={repo.owner.login}
+                  size="sm"
+                />
                 <Text variant="label" size="xs" tone="muted">
                   {repo.owner.login}
                 </Text>
