@@ -21,9 +21,9 @@ Keep entities and repository interfaces in `src/domain`, with no imports from ex
 or outer application layers. Put GitHub DTOs, Axios configuration, mappers, and concrete repository
 implementations in `src/infrastructure/github`.
 
-Infrastructure converts snake_case DTOs to provider-independent, camelCase domain entities. It
-also removes pull requests returned by GitHub's issues endpoint before results reach the features.
-Features depend on domain-shaped results and use the concrete adapters only at their query boundary.
+Infrastructure converts snake_case DTOs to provider-independent, camelCase domain entities.
+Features depend on domain-shaped results. Application-layer orchestration was introduced later in
+[ADR-002](./002-application-layer-use-cases.md).
 
 ## Alternatives considered
 
@@ -42,7 +42,6 @@ does not currently need.
 
 - UI code uses provider-independent names and real `Date` values.
 - GitHub-specific response changes are contained in infrastructure DTOs and mappers.
-- Pull-request filtering is performed once at the integration boundary.
+- Provider-specific records are identified during mapping so application rules can handle them.
 - Adding another provider requires implementing the domain repositories.
-- Hooks currently select the concrete GitHub adapters; dependency injection can be introduced if
-  runtime provider selection or isolated hook tests become necessary.
+- Concrete GitHub adapters implement the domain repository ports.

@@ -109,7 +109,7 @@ describe('GitHubRepositoryRepository', () => {
 });
 
 describe('GitHubIssueRepository', () => {
-  it('loads open issues, removes pull requests and maps the response', async () => {
+  it('loads and maps issues and pull requests without applying business rules', async () => {
     mockGet.mockResolvedValueOnce({
       data: [mockIssue, { ...mockIssue, id: 43, pull_request: { url: 'https://example.com/pr' } }],
     });
@@ -119,12 +119,14 @@ describe('GitHubIssueRepository', () => {
     expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react/issues', {
       params: { state: 'open', page: 1, per_page: 30 },
     });
-    expect(result.items).toHaveLength(1);
+    expect(result.items).toHaveLength(2);
     expect(result.items[0]).toMatchObject({
       id: 42,
       author: { login: 'facebook' },
       commentsCount: 3,
+      isPullRequest: false,
     });
+    expect(result.items[1]).toMatchObject({ id: 43, isPullRequest: true });
   });
 
   it('uses the unfiltered API page size to determine the next page', async () => {
@@ -140,22 +142,19 @@ describe('GitHubIssueRepository', () => {
     });
   });
 
-  it('skips API pages containing only pull requests', async () => {
+  it('returns a page containing only pull requests without fetching another page', async () => {
     const pullRequests = Array.from({ length: 30 }, (_, id) => ({
       ...mockIssue,
       id,
       pull_request: { url: `https://example.com/pr/${id}` },
     }));
-    mockGet
-      .mockResolvedValueOnce({ data: pullRequests })
-      .mockResolvedValueOnce({ data: [mockIssue] });
+    mockGet.mockResolvedValueOnce({ data: pullRequests });
 
     const result = await issueRepository.findOpenByRepository('facebook', 'react', 2);
 
-    expect(mockGet).toHaveBeenNthCalledWith(2, '/repos/facebook/react/issues', {
-      params: { state: 'open', page: 3, per_page: 30 },
-    });
-    expect(result.items).toHaveLength(1);
-    expect(result.nextPage).toBeNull();
+    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(result.items).toHaveLength(30);
+    expect(result.items.every((item) => item.isPullRequest)).toBe(true);
+    expect(result.nextPage).toBe(3);
   });
 });

@@ -67,5 +67,6 @@ export function mapIssue(dto: GitHubIssueDto): Issue {
     updatedAt: new Date(dto.updated_at),
     closedAt: dto.closed_at ? new Date(dto.closed_at) : null,
     url: dto.html_url,
+    isPullRequest: Boolean(dto.pull_request),
   };
 }

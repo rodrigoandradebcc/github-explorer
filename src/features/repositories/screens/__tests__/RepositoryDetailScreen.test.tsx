@@ -3,7 +3,7 @@ import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
 import { useRepository } from '@/features/repositories/hooks/useRepository';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 import type { RepositoryDetails } from '@/domain/entities/Repository';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';

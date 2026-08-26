@@ -1,7 +1,6 @@
 const React = require('react');
 const { View, Text, Image, ScrollView } = require('react-native');
 
-const noop = () => {};
 const id = (x) => x;
 
 const useSharedValue = (init) => ({ value: init });
@@ -47,18 +46,18 @@ const Easing = {
   ease: id,
 };
 
-const AnimatedView = React.forwardRef((props, ref) =>
-  React.createElement(View, { ...props, ref }),
-);
-const AnimatedText = React.forwardRef((props, ref) =>
-  React.createElement(Text, { ...props, ref }),
-);
-const AnimatedImage = React.forwardRef((props, ref) =>
-  React.createElement(Image, { ...props, ref }),
-);
-const AnimatedScrollView = React.forwardRef((props, ref) =>
-  React.createElement(ScrollView, { ...props, ref }),
-);
+const AnimatedView = React.forwardRef(function AnimatedView(props, ref) {
+  return React.createElement(View, { ...props, ref });
+});
+const AnimatedText = React.forwardRef(function AnimatedText(props, ref) {
+  return React.createElement(Text, { ...props, ref });
+});
+const AnimatedImage = React.forwardRef(function AnimatedImage(props, ref) {
+  return React.createElement(Image, { ...props, ref });
+});
+const AnimatedScrollView = React.forwardRef(function AnimatedScrollView(props, ref) {
+  return React.createElement(ScrollView, { ...props, ref });
+});
 
 const Animated = {
   View: AnimatedView,
@@ -66,7 +65,9 @@ const Animated = {
   Image: AnimatedImage,
   ScrollView: AnimatedScrollView,
   createAnimatedComponent: (Component) =>
-    React.forwardRef((props, ref) => React.createElement(Component, { ...props, ref })),
+    React.forwardRef(function AnimatedComponent(props, ref) {
+      return React.createElement(Component, { ...props, ref });
+    }),
 };
 
 module.exports = {

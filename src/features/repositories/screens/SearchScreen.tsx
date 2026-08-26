@@ -7,7 +7,7 @@ import { Box, GlassView, Heading, useTheme } from '@/design-system';
 import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { Repository } from '@/domain/entities/Repository';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 
 import { SearchBottomTabBar } from '../components/SearchBottomTabBar';
 import { SearchContent } from '../components/SearchContent';

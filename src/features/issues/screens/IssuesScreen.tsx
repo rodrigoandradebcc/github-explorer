@@ -10,7 +10,7 @@ import { IssuesEmptyState } from '@/features/issues/components/IssuesEmptyState'
 import { IssuesSkeletonList } from '@/features/issues/components/IssuesSkeletonList';
 import { useRepositoryIssues } from '@/features/issues/hooks/useRepositoryIssues';
 import type { Issue } from '@/domain/entities/Issue';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 
 export function IssuesScreen() {
   const { owner, repo } = useLocalSearchParams<{ owner: string; repo: string }>();

@@ -20,4 +20,5 @@ export interface Issue {
   updatedAt: Date;
   closedAt: Date | null;
   url: string;
+  isPullRequest: boolean;
 }

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
 import { useSearchRepositories } from '@/features/repositories/hooks/useSearchRepositories';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 import type { Repository } from '@/domain/entities/Repository';
 
 import { SearchScreen } from '../SearchScreen';

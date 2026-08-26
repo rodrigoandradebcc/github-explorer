@@ -142,6 +142,11 @@ src/
 │   ├── repositories/           # Interfaces dos repositórios (ports)
 │   └── shared/                 # Contratos compartilhados, como Page<T>
 │
+├── application/                # Use cases, services e composition root
+│   ├── repositories/           # SearchRepos, GetRepoDetails e RepoService
+│   ├── issues/                 # ListRepoIssues e IssueService
+│   └── container.ts            # Liga as ports aos adapters concretos
+│
 ├── infrastructure/github/      # DTOs, mappers, Axios e adapters concretos do GitHub
 │
 ├── features/                   # Domínios de negócio, cada um auto-contido
@@ -185,6 +190,16 @@ em `src/infrastructure/github/dtos.ts` e são convertidos para entidades por map
 aplicação. Assim, particularidades da API — incluindo o fato de o endpoint de issues também retornar
 pull requests — não vazam para telas e componentes. Veja o
 [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
+
+### Use cases e services de aplicação
+
+Use cases representam uma operação do sistema e concentram validação e orquestração do domínio por
+meio das interfaces de repositório. Services são fachadas finas que agrupam os use cases de cada
+agregado e oferecem uma superfície estável para os hooks. Apenas o `application/container.ts`
+conhece os adapters concretos: ele injeta as implementações nos use cases e monta os services sem
+uma biblioteca de DI. Assim, React Query continua responsável por cache e estado assíncrono, mas não
+carrega regras de negócio nem conhece infraestrutura. Veja o
+[ADR-002](docs/decisions/002-application-layer-use-cases.md).
 
 ### Design System como módulo fechado
 

@@ -3,7 +3,7 @@ import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
 import { useRepositoryIssues } from '@/features/issues/hooks/useRepositoryIssues';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 import type { Issue } from '@/domain/entities/Issue';
 
 import { IssuesScreen } from '../IssuesScreen';
@@ -39,6 +39,7 @@ const makeIssue = (overrides: Partial<Issue> = {}): Issue => ({
   updatedAt: new Date('2024-01-01T00:00:00Z'),
   closedAt: null,
   url: 'https://github.com/facebook/react/issues/1',
+  isPullRequest: false,
   ...overrides,
 });
 

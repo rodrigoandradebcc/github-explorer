@@ -5,7 +5,7 @@ import { useTheme } from '@/design-system';
 import { GithubApiErrorState } from '@/features/github/components/GithubApiErrorState';
 import { getGithubStackScreenOptions } from '@/features/github/navigation/getGithubStackScreenOptions';
 import { useRepository } from '@/features/repositories/hooks/useRepository';
-import { ApiError } from '@/infrastructure/github/client';
+import { ApiError } from '@/application';
 
 import { RepositoryDetailContent } from '../components/RepositoryDetailContent';
 import { RepositoryDetailSkeleton } from '../components/RepositoryDetailSkeleton';
