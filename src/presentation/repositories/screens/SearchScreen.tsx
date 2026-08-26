@@ -4,10 +4,10 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Box, GlassView, Heading, useTheme } from '@/design-system';
-import { useSearchRepositories } from '@/presentation/repositories/hooks/useSearchRepositories';
+import { isRateLimitError } from '@/presentation/github/utils/isRateLimitError';
+import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import { useDebounce } from '@/presentation/shared/hooks/useDebounce';
 import type { Repository } from '@/domain/entities/Repository';
-import { ApiError } from '@/application';
 
 import { SearchBottomTabBar } from '../components/SearchBottomTabBar';
 import { SearchContent } from '../components/SearchContent';
@@ -31,11 +31,11 @@ export function SearchScreen() {
     error,
     refetch,
     isRefetching,
-  } = useSearchRepositories(debouncedQuery);
+  } = useSearchRepos(debouncedQuery);
 
   const repos = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
   const hasQuery = debouncedQuery.trim().length > 0;
-  const isRateLimit = error instanceof ApiError && error.isRateLimit;
+  const isRateLimit = isRateLimitError(error);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {

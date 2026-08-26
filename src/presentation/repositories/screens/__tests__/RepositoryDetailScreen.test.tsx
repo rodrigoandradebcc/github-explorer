@@ -2,8 +2,7 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
-import { useRepository } from '@/presentation/repositories/hooks/useRepository';
-import { ApiError } from '@/application';
+import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 import type { RepositoryDetails } from '@/domain/entities/Repository';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';
@@ -18,8 +17,8 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-jest.mock('@/presentation/repositories/hooks/useRepository');
-const mockHook = useRepository as jest.MockedFunction<typeof useRepository>;
+jest.mock('@/presentation/repositories/hooks/useRepoDetails');
+const mockHook = useRepoDetails as jest.MockedFunction<typeof useRepoDetails>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -54,7 +53,7 @@ const makeDetail = (overrides: Partial<RepositoryDetails> = {}): RepositoryDetai
   ...overrides,
 });
 
-function withData(overrides: Partial<ReturnType<typeof useRepository>> = {}) {
+function withData(overrides: Partial<ReturnType<typeof useRepoDetails>> = {}) {
   mockHook.mockReturnValue({
     data: undefined,
     isLoading: false,
@@ -62,7 +61,7 @@ function withData(overrides: Partial<ReturnType<typeof useRepository>> = {}) {
     error: null,
     refetch: jest.fn(),
     ...overrides,
-  } as unknown as ReturnType<typeof useRepository>);
+  } as unknown as ReturnType<typeof useRepoDetails>);
 }
 
 // ── tests ─────────────────────────────────────────────────────────────────────
@@ -96,7 +95,10 @@ describe('RepositoryDetailScreen', () => {
   });
 
   it('shows rate-limit error with token hint', () => {
-    withData({ isError: true, error: new ApiError(403, 'rate limit', true) });
+    withData({
+      isError: true,
+      error: Object.assign(new Error('rate limit'), { isRateLimit: true }),
+    });
     renderWithTheme(<RepositoryDetailScreen />);
     expect(screen.getByTestId('detail-error')).toBeTruthy();
     expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();

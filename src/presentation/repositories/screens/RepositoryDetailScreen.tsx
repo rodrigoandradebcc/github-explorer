@@ -4,8 +4,8 @@ import React from 'react';
 import { useTheme } from '@/design-system';
 import { GithubApiErrorState } from '@/presentation/github/components/GithubApiErrorState';
 import { getGithubStackScreenOptions } from '@/presentation/github/navigation/getGithubStackScreenOptions';
-import { useRepository } from '@/presentation/repositories/hooks/useRepository';
-import { ApiError } from '@/application';
+import { isRateLimitError } from '@/presentation/github/utils/isRateLimitError';
+import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
 
 import { RepositoryDetailContent } from '../components/RepositoryDetailContent';
 import { RepositoryDetailSkeleton } from '../components/RepositoryDetailSkeleton';
@@ -14,9 +14,9 @@ export function RepositoryDetailScreen() {
   const { owner, repo } = useLocalSearchParams<{ owner: string; repo: string }>();
   const router = useRouter();
   const { colors } = useTheme();
-  const { data, isLoading, isError, error, refetch } = useRepository(owner, repo);
+  const { data, isLoading, isError, error, refetch } = useRepoDetails(owner, repo);
 
-  const isRateLimit = error instanceof ApiError && error.isRateLimit;
+  const isRateLimit = isRateLimitError(error);
   const title = typeof repo === 'string' ? repo : undefined;
   const headerOptions = getGithubStackScreenOptions({ title, colors });
 

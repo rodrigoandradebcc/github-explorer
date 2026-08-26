@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { repoService } from '@/application';
+import { useRepoService } from '@/presentation/di/ApplicationProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
-export function useRepository(owner: string, repo: string) {
+export function useRepoDetails(owner: string, repo: string) {
+  const repoService = useRepoService();
+
   return useQuery({
     queryKey: queryKeys.repositories.detail(owner, repo),
     queryFn: () => repoService.details(owner, repo),

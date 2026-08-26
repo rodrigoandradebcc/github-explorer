@@ -2,8 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
-import { useSearchRepositories } from '@/presentation/repositories/hooks/useSearchRepositories';
-import { ApiError } from '@/application';
+import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import type { Repository } from '@/domain/entities/Repository';
 
 import { SearchScreen } from '../SearchScreen';
@@ -15,9 +14,9 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-jest.mock('@/presentation/repositories/hooks/useSearchRepositories');
+jest.mock('@/presentation/repositories/hooks/useSearchRepos');
 
-const mockHook = useSearchRepositories as jest.MockedFunction<typeof useSearchRepositories>;
+const mockHook = useSearchRepos as jest.MockedFunction<typeof useSearchRepos>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -57,7 +56,7 @@ function idleHook(overrides = {}) {
     refetch: jest.fn(),
     isRefetching: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useSearchRepositories>);
+  } as unknown as ReturnType<typeof useSearchRepos>);
 }
 
 // ── tests ─────────────────────────────────────────────────────────────────────
@@ -125,7 +124,7 @@ describe('SearchScreen', () => {
   });
 
   it('shows rate-limit error with token hint', async () => {
-    const rateLimitErr = new ApiError(403, 'rate limit exceeded', true);
+    const rateLimitErr = Object.assign(new Error('rate limit exceeded'), { isRateLimit: true });
     idleHook({ isError: true, error: rateLimitErr });
 
     renderWithTheme(<SearchScreen />);

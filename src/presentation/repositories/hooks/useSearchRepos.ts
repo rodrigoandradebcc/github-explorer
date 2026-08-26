@@ -1,11 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { repoService } from '@/application';
+import { useRepoService } from '@/presentation/di/ApplicationProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
-export function useSearchRepositories(query: string) {
+export function useSearchRepos(query: string) {
+  const repoService = useRepoService();
+
   return useInfiniteQuery({
     queryKey: queryKeys.repositories.search(query),
     queryFn: ({ pageParam }) => repoService.search(query, pageParam),

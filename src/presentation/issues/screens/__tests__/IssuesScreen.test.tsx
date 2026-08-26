@@ -2,8 +2,7 @@ import { screen } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithTheme } from '@/design-system/__test-utils__/renderWithTheme';
-import { useRepositoryIssues } from '@/presentation/issues/hooks/useRepositoryIssues';
-import { ApiError } from '@/application';
+import { useRepoIssues } from '@/presentation/issues/hooks/useRepoIssues';
 import type { Issue } from '@/domain/entities/Issue';
 
 import { IssuesScreen } from '../IssuesScreen';
@@ -15,8 +14,8 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-jest.mock('@/presentation/issues/hooks/useRepositoryIssues');
-const mockHook = useRepositoryIssues as jest.MockedFunction<typeof useRepositoryIssues>;
+jest.mock('@/presentation/issues/hooks/useRepoIssues');
+const mockHook = useRepoIssues as jest.MockedFunction<typeof useRepoIssues>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -43,7 +42,7 @@ const makeIssue = (overrides: Partial<Issue> = {}): Issue => ({
   ...overrides,
 });
 
-function withData(overrides: Partial<ReturnType<typeof useRepositoryIssues>> = {}) {
+function withData(overrides: Partial<ReturnType<typeof useRepoIssues>> = {}) {
   mockHook.mockReturnValue({
     data: undefined,
     isLoading: false,
@@ -55,7 +54,7 @@ function withData(overrides: Partial<ReturnType<typeof useRepositoryIssues>> = {
     refetch: jest.fn(),
     isRefetching: false,
     ...overrides,
-  } as unknown as ReturnType<typeof useRepositoryIssues>);
+  } as unknown as ReturnType<typeof useRepoIssues>);
 }
 
 // ── tests ─────────────────────────────────────────────────────────────────────
@@ -80,7 +79,10 @@ describe('IssuesScreen', () => {
   });
 
   it('shows rate-limit error with token hint', () => {
-    withData({ isError: true, error: new ApiError(403, 'rate limit exceeded', true) });
+    withData({
+      isError: true,
+      error: Object.assign(new Error('rate limit exceeded'), { isRateLimit: true }),
+    });
     renderWithTheme(<IssuesScreen />);
     expect(screen.getByTestId('issues-error')).toBeTruthy();
     expect(screen.getByText(/EXPO_PUBLIC_GITHUB_TOKEN/)).toBeTruthy();

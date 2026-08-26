@@ -1,9 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { issueService } from '@/application';
+import { useIssueService } from '@/presentation/di/ApplicationProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
-export function useRepositoryIssues(owner: string, repo: string) {
+export function useRepoIssues(owner: string, repo: string) {
+  const issueService = useIssueService();
+
   return useInfiniteQuery({
     queryKey: queryKeys.repositories.issues(owner, repo),
     queryFn: ({ pageParam }) => issueService.listOpen(owner, repo, pageParam),
