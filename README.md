@@ -183,6 +183,11 @@ src/
 
 ## Decisões arquiteturais
 
+As regras que qualquer módulo novo precisa seguir — camadas, dependências permitidas, convenções de
+nome, padrão de teste por camada e checklist de criação — estão em
+[docs/ARCHITECTURE-RULES.md](docs/ARCHITECTURE-RULES.md). Os arquivos `AGENTS.md`,
+`.claude/rules/`, `.cursor/rules/` e `.github/copilot-instructions.md` são ponteiros para ele.
+
 ### Camadas na raiz e organização por feature
 
 As fronteiras arquiteturais ficam explícitas na raiz de `src/`: `domain/`, `application/`,
