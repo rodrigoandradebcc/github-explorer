@@ -16,7 +16,7 @@ describe('AxiosGitHubIssueDataSource', () => {
     const result = await new AxiosGitHubIssueDataSource().listOpenIssues('facebook', 'react', 3);
 
     expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react/issues', {
-      params: { state: 'open', page: 3, per_page: 30 },
+      params: { state: 'open', page: 3, per_page: 20 },
     });
     expect(result).toBe(response);
   });

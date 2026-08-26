@@ -1,1 +1,1 @@
-export const GITHUB_PAGE_SIZE = 30;
+export const GITHUB_PAGE_SIZE = 20;

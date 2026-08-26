@@ -68,9 +68,9 @@ const mockIssue: GitHubIssueDto = {
 describe('GitHubRepositoryRepository', () => {
   it('maps a full middle search page and advances pagination', async () => {
     const response: GitHubSearchRepositoriesResponseDto = {
-      total_count: 31,
+      total_count: 21,
       incomplete_results: false,
-      items: Array.from({ length: 30 }, (_, id) => ({ ...mockRepository, id })),
+      items: Array.from({ length: 20 }, (_, id) => ({ ...mockRepository, id })),
     };
     const dataSource = fakeRepositoryDataSource({
       searchRepositories: jest.fn().mockResolvedValue(response),
@@ -79,7 +79,7 @@ describe('GitHubRepositoryRepository', () => {
     const result = await new GitHubRepositoryRepository(dataSource).search('react', 1);
 
     expect(dataSource.searchRepositories).toHaveBeenCalledWith('react', 1);
-    expect(result).toMatchObject({ total: 31, nextPage: 2 });
+    expect(result).toMatchObject({ total: 21, nextPage: 2 });
     expect(result.items[0]).toMatchObject({
       fullName: 'facebook/react',
       starsCount: 200000,
@@ -93,11 +93,11 @@ describe('GitHubRepositoryRepository', () => {
       searchRepositories: jest.fn().mockResolvedValue({
         total_count: 1500,
         incomplete_results: false,
-        items: Array.from({ length: 30 }, (_, id) => ({ ...mockRepository, id })),
+        items: Array.from({ length: 20 }, (_, id) => ({ ...mockRepository, id })),
       }),
     });
 
-    const result = await new GitHubRepositoryRepository(dataSource).search('react', 34);
+    const result = await new GitHubRepositoryRepository(dataSource).search('react', 50);
 
     expect(result.nextPage).toBeNull();
   });
@@ -163,7 +163,7 @@ describe('GitHubIssueRepository', () => {
     const dataSource = fakeIssueDataSource({
       listOpenIssues: jest
         .fn()
-        .mockResolvedValue(Array.from({ length: 30 }, (_, id) => ({ ...mockIssue, id }))),
+        .mockResolvedValue(Array.from({ length: 20 }, (_, id) => ({ ...mockIssue, id }))),
     });
 
     const result = await new GitHubIssueRepository(dataSource).findOpenByRepository(
