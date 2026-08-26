@@ -3,6 +3,7 @@ import type { GitLabIssueDataSource } from '../GitLabIssueDataSource';
 import { GitLabIssueRepository } from '../GitLabIssueRepository';
 import type { GitLabRepositoryDataSource } from '../GitLabRepositoryDataSource';
 import { GitLabRepositoryRepository } from '../GitLabRepositoryRepository';
+import { parsePositiveIntHeader } from '../mappers';
 
 function fakeRepositoryDataSource(
   overrides: Partial<GitLabRepositoryDataSource> = {},
@@ -165,5 +166,116 @@ describe('GitLabIssueRepository', () => {
         { id: 1, name: 'ci', color: null, description: null },
       ],
     });
+  });
+});
+
+describe('parsePositiveIntHeader', () => {
+  it('reads a positive integer header', () => {
+    expect(parsePositiveIntHeader('55')).toBe(55);
+    expect(parsePositiveIntHeader('1')).toBe(1);
+  });
+
+  it('rejects non-numeric, zero and negative headers', () => {
+    expect(parsePositiveIntHeader('abc')).toBeNull();
+    expect(parsePositiveIntHeader('0')).toBeNull();
+    expect(parsePositiveIntHeader('-1')).toBeNull();
+  });
+
+  it('treats an absent header as no value', () => {
+    expect(parsePositiveIntHeader(null)).toBeNull();
+  });
+});
+
+const mockUserNamespaceProject: GitLabProjectDetailsDto = {
+  ...mockProject,
+  visibility: 'private',
+  namespace: {
+    id: 3,
+    name: 'Jane Doe',
+    path: 'jane',
+    kind: 'user',
+    full_path: 'jane',
+    avatar_url: 'https://gitlab.com/uploads/-/system/user/avatar/3/avatar.png',
+    web_url: 'https://gitlab.com/jane',
+  },
+};
+
+const mockClosedIssue: GitLabIssueDto = {
+  ...mockIssue,
+  state: 'closed',
+  closed_at: '2024-03-04T05:06:07Z',
+};
+
+describe('GitLabRepositoryRepository mapping branches', () => {
+  it('maps a user namespace to a user owner without re-prefixing absolute avatar URLs', async () => {
+    const dataSource = fakeRepositoryDataSource({
+      searchProjects: jest.fn().mockResolvedValue({
+        items: [mockUserNamespaceProject],
+        totalHeader: '1',
+        nextPageHeader: null,
+      }),
+    });
+
+    const result = await new GitLabRepositoryRepository(dataSource).search('jane', 1);
+
+    expect(result.items[0]?.owner).toEqual({
+      id: 3,
+      login: 'jane',
+      avatarUrl: 'https://gitlab.com/uploads/-/system/user/avatar/3/avatar.png',
+      profileUrl: 'https://gitlab.com/jane',
+      type: 'user',
+    });
+  });
+
+  it('marks non-public visibility as private', async () => {
+    const dataSource = fakeRepositoryDataSource({
+      getProject: jest.fn().mockResolvedValue(mockUserNamespaceProject),
+    });
+
+    const result = await new GitLabRepositoryRepository(dataSource).findByOwnerAndName(
+      'jane',
+      'gitlab-foss',
+    );
+
+    expect(result.isPrivate).toBe(true);
+  });
+});
+
+describe('GitLabIssueRepository mapping branches', () => {
+  it('maps a closed issue to the closed state with its closing date', async () => {
+    const dataSource = fakeIssueDataSource({
+      listOpenIssues: jest.fn().mockResolvedValue({
+        items: [mockClosedIssue],
+        totalHeader: null,
+        nextPageHeader: null,
+      }),
+    });
+
+    const result = await new GitLabIssueRepository(dataSource).findOpenByRepository(
+      'gitlab-org',
+      'gitlab-foss',
+    );
+
+    expect(result.items[0]?.state).toBe('closed');
+    expect(result.items[0]?.closedAt).toEqual(new Date('2024-03-04T05:06:07Z'));
+  });
+
+  it('keeps an already-absolute author avatar URL untouched', async () => {
+    const dataSource = fakeIssueDataSource({
+      listOpenIssues: jest.fn().mockResolvedValue({
+        items: [mockIssue],
+        totalHeader: null,
+        nextPageHeader: null,
+      }),
+    });
+
+    const result = await new GitLabIssueRepository(dataSource).findOpenByRepository(
+      'gitlab-org',
+      'gitlab-foss',
+    );
+
+    expect(result.items[0]?.author.avatarUrl).toBe(
+      'https://gitlab.com/uploads/user/avatar/3/avatar.png',
+    );
   });
 });
