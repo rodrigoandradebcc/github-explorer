@@ -29,6 +29,16 @@ describe('SearchReposUseCase', () => {
     const useCase = new SearchReposUseCase(repositories);
 
     await expect(useCase.execute({ query: '  react  ', page: 2 })).resolves.toBe(result);
-    expect(repositories.search).toHaveBeenCalledWith('react', 2);
+    expect(repositories.search).toHaveBeenCalledWith('react', 2, { signal: undefined });
+  });
+
+  it('forwards the caller abort signal to the port', async () => {
+    const repositories = makeRepositoryPort();
+    repositories.search.mockResolvedValue({ items: [], total: 0, nextPage: null });
+    const { signal } = new AbortController();
+
+    await new SearchReposUseCase(repositories).execute({ query: 'react', signal });
+
+    expect(repositories.search).toHaveBeenCalledWith('react', 1, { signal });
   });
 });

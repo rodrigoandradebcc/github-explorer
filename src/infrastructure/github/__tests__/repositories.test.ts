@@ -78,7 +78,7 @@ describe('GitHubRepositoryRepository', () => {
 
     const result = await new GitHubRepositoryRepository(dataSource).search('react', 1);
 
-    expect(dataSource.searchRepositories).toHaveBeenCalledWith('react', 1);
+    expect(dataSource.searchRepositories).toHaveBeenCalledWith('react', 1, undefined);
     expect(result).toMatchObject({ total: 21, nextPage: 2 });
     expect(result.items[0]).toMatchObject({
       fullName: 'facebook/react',
@@ -126,7 +126,7 @@ describe('GitHubRepositoryRepository', () => {
       'react',
     );
 
-    expect(dataSource.getRepository).toHaveBeenCalledWith('facebook', 'react');
+    expect(dataSource.getRepository).toHaveBeenCalledWith('facebook', 'react', undefined);
     expect(result).toMatchObject({ watchersCount: 200000, defaultBranch: 'main' });
     expect(result.license).toEqual({ key: 'mit', name: 'MIT License', spdxId: 'MIT' });
   });
@@ -148,7 +148,7 @@ describe('GitHubIssueRepository', () => {
       'react',
     );
 
-    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 1);
+    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 1, undefined);
     expect(result.items).toHaveLength(2);
     expect(result.items[0]).toMatchObject({
       id: 42,
@@ -173,6 +173,26 @@ describe('GitHubIssueRepository', () => {
     );
 
     expect(result.nextPage).toBe(4);
-    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 3);
+    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 3, undefined);
+  });
+});
+
+describe('GitHub adapters forward request options', () => {
+  it('passes the abort signal straight through to the datasource', async () => {
+    const { signal } = new AbortController();
+    const repositoryDataSource = fakeRepositoryDataSource({
+      searchRepositories: jest.fn().mockResolvedValue({ total_count: 0, items: [] }),
+    });
+    const issueDataSource = fakeIssueDataSource({
+      listOpenIssues: jest.fn().mockResolvedValue([]),
+    });
+
+    await new GitHubRepositoryRepository(repositoryDataSource).search('react', 1, { signal });
+    await new GitHubIssueRepository(issueDataSource).findOpenByRepository('facebook', 'react', 1, {
+      signal,
+    });
+
+    expect(repositoryDataSource.searchRepositories).toHaveBeenCalledWith('react', 1, { signal });
+    expect(issueDataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 1, { signal });
   });
 });

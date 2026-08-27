@@ -1,9 +1,4 @@
-export type DataAccessErrorKind =
-  | 'rateLimit'
-  | 'notFound'
-  | 'network'
-  | 'cancelled'
-  | 'unknown';
+export type DataAccessErrorKind = 'rateLimit' | 'notFound' | 'network' | 'cancelled' | 'unknown';
 
 export class DataAccessError extends Error {
   readonly kind: DataAccessErrorKind;

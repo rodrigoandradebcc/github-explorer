@@ -29,4 +29,17 @@ describe('GetRepoDetailsUseCase', () => {
     );
     expect(repositories.findByOwnerAndName).not.toHaveBeenCalled();
   });
+
+  it('trims the input and forwards the abort signal to the port', async () => {
+    const repositories = makeRepositoryPort();
+    const { signal } = new AbortController();
+
+    await new GetRepoDetailsUseCase(repositories).execute({
+      owner: ' facebook ',
+      name: ' react ',
+      signal,
+    });
+
+    expect(repositories.findByOwnerAndName).toHaveBeenCalledWith('facebook', 'react', { signal });
+  });
 });

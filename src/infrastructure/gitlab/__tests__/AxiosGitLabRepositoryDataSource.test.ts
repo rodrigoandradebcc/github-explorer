@@ -19,6 +19,7 @@ describe('AxiosGitLabRepositoryDataSource', () => {
 
     expect(mockGet).toHaveBeenCalledWith('/projects', {
       params: { search: 'react', order_by: 'star_count', sort: 'desc', page: 2, per_page: 20 },
+      signal: undefined,
     });
     expect(result).toEqual({ items: [], totalHeader: '55', nextPageHeader: '3' });
   });
@@ -37,7 +38,24 @@ describe('AxiosGitLabRepositoryDataSource', () => {
 
     const result = await new AxiosGitLabRepositoryDataSource().getProject('gitlab-org/gitlab-foss');
 
-    expect(mockGet).toHaveBeenCalledWith('/projects/gitlab-org%2Fgitlab-foss');
+    expect(mockGet).toHaveBeenCalledWith('/projects/gitlab-org%2Fgitlab-foss', {
+      signal: undefined,
+    });
     expect(result).toBe(response);
+  });
+
+  it('hands the abort signal to Axios on both calls', async () => {
+    const { signal } = new AbortController();
+    mockGet.mockResolvedValue({ data: [], headers: {} });
+    const dataSource = new AxiosGitLabRepositoryDataSource();
+
+    await dataSource.searchProjects('react', 1, { signal });
+    await dataSource.getProject('gitlab-org/gitlab-foss', { signal });
+
+    expect(mockGet).toHaveBeenNthCalledWith(1, '/projects', {
+      params: { search: 'react', order_by: 'star_count', sort: 'desc', page: 1, per_page: 20 },
+      signal,
+    });
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/projects/gitlab-org%2Fgitlab-foss', { signal });
   });
 });

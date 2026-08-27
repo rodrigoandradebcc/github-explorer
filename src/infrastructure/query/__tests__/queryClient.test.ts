@@ -12,6 +12,7 @@ describe('createQueryClient', () => {
       refetchOnWindowFocus: false,
     });
     expect(retry(0, new DataAccessError('rateLimit', 'rate limit'))).toBe(false);
+    expect(retry(0, new DataAccessError('cancelled', 'canceled'))).toBe(false);
     expect(retry(0, new DataAccessError('notFound', 'missing'))).toBe(true);
     expect(retry(0, new Error('network'))).toBe(true);
     expect(retry(1, new Error('network'))).toBe(false);

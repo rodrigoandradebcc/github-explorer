@@ -17,6 +17,7 @@ describe('AxiosGitHubRepositoryDataSource', () => {
 
     expect(mockGet).toHaveBeenCalledWith('/search/repositories', {
       params: { q: 'react', page: 2, per_page: 20 },
+      signal: undefined,
     });
     expect(result).toBe(response);
   });
@@ -27,7 +28,22 @@ describe('AxiosGitHubRepositoryDataSource', () => {
 
     const result = await new AxiosGitHubRepositoryDataSource().getRepository('facebook', 'react');
 
-    expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react');
+    expect(mockGet).toHaveBeenCalledWith('/repos/facebook/react', { signal: undefined });
     expect(result).toBe(response);
+  });
+
+  it('hands the abort signal to Axios on both calls', async () => {
+    const { signal } = new AbortController();
+    mockGet.mockResolvedValue({ data: {} });
+    const dataSource = new AxiosGitHubRepositoryDataSource();
+
+    await dataSource.searchRepositories('react', 1, { signal });
+    await dataSource.getRepository('facebook', 'react', { signal });
+
+    expect(mockGet).toHaveBeenNthCalledWith(1, '/search/repositories', {
+      params: { q: 'react', page: 1, per_page: 20 },
+      signal,
+    });
+    expect(mockGet).toHaveBeenNthCalledWith(2, '/repos/facebook/react', { signal });
   });
 });

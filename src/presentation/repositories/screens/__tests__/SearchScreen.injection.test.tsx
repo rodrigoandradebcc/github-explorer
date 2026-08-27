@@ -60,7 +60,7 @@ describe('SearchScreen service injection', () => {
     await waitFor(() => {
       expect(screen.getByText('injected-repository')).toBeTruthy();
     });
-    expect(search).toHaveBeenCalledWith('injected', 1);
+    expect(search).toHaveBeenCalledWith('injected', 1, { signal: expect.any(AbortSignal) });
   });
 
   it('refetches through the same injected service when the source switches', async () => {
@@ -81,7 +81,9 @@ describe('SearchScreen service injection', () => {
     fireEvent.press(screen.getByTestId('data-source-option-gitlab'));
 
     await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
-    expect(search).toHaveBeenNthCalledWith(2, 'injected', 1);
+    expect(search).toHaveBeenNthCalledWith(2, 'injected', 1, {
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('URL-encodes route segments when opening a repository', async () => {

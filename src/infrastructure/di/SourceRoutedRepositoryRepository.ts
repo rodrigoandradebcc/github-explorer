@@ -15,10 +15,6 @@ export class SourceRoutedRepositoryRepository implements RepositoryRepository {
   }
 
   findByOwnerAndName(owner: string, name: string, options?: RequestOptions) {
-    return this.registry[this.activeSource()].repositories.findByOwnerAndName(
-      owner,
-      name,
-      options,
-    );
+    return this.registry[this.activeSource()].repositories.findByOwnerAndName(owner, name, options);
   }
 }

@@ -77,7 +77,7 @@ describe('GitLabRepositoryRepository', () => {
 
     const result = await new GitLabRepositoryRepository(dataSource).search('gitlab', 2);
 
-    expect(dataSource.searchProjects).toHaveBeenCalledWith('gitlab', 2);
+    expect(dataSource.searchProjects).toHaveBeenCalledWith('gitlab', 2, undefined);
     expect(result.total).toBe(55);
     expect(result.nextPage).toBe(3);
     expect(result.items[0]).toMatchObject({
@@ -122,7 +122,7 @@ describe('GitLabRepositoryRepository', () => {
       'gitlab-foss',
     );
 
-    expect(dataSource.getProject).toHaveBeenCalledWith('gitlab-org/gitlab-foss');
+    expect(dataSource.getProject).toHaveBeenCalledWith('gitlab-org/gitlab-foss', undefined);
     expect(result).toMatchObject({
       watchersCount: null,
       subscribersCount: null,
@@ -151,7 +151,7 @@ describe('GitLabIssueRepository', () => {
       3,
     );
 
-    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('gitlab-org/gitlab-foss', 3);
+    expect(dataSource.listOpenIssues).toHaveBeenCalledWith('gitlab-org/gitlab-foss', 3, undefined);
     expect(result.total).toBe(12);
     expect(result.nextPage).toBe(4);
     expect(result.items[0]).toMatchObject({
@@ -277,5 +277,31 @@ describe('GitLabIssueRepository mapping branches', () => {
     expect(result.items[0]?.author.avatarUrl).toBe(
       'https://gitlab.com/uploads/user/avatar/3/avatar.png',
     );
+  });
+});
+
+describe('GitLab adapters forward request options', () => {
+  it('passes the abort signal straight through to the datasource', async () => {
+    const { signal } = new AbortController();
+    const emptyPage = { items: [], totalHeader: null, nextPageHeader: null };
+    const repositoryDataSource = fakeRepositoryDataSource({
+      searchProjects: jest.fn().mockResolvedValue(emptyPage),
+    });
+    const issueDataSource = fakeIssueDataSource({
+      listOpenIssues: jest.fn().mockResolvedValue(emptyPage),
+    });
+
+    await new GitLabRepositoryRepository(repositoryDataSource).search('gitlab', 1, { signal });
+    await new GitLabIssueRepository(issueDataSource).findOpenByRepository(
+      'gitlab-org',
+      'gitlab-foss',
+      1,
+      { signal },
+    );
+
+    expect(repositoryDataSource.searchProjects).toHaveBeenCalledWith('gitlab', 1, { signal });
+    expect(issueDataSource.listOpenIssues).toHaveBeenCalledWith('gitlab-org/gitlab-foss', 1, {
+      signal,
+    });
   });
 });

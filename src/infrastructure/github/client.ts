@@ -1,4 +1,4 @@
-import axios, { type AxiosError } from 'axios';
+import axios, { isCancel, type AxiosError } from 'axios';
 
 import { DataAccessError, type DataAccessErrorKind } from '@/domain/errors/DataAccessError';
 
@@ -12,7 +12,7 @@ function toKind(status: number): DataAccessErrorKind {
 export function toDataAccessError(error: AxiosError): DataAccessError {
   // A request aborted by the caller is not a transport failure. It still crosses the
   // boundary as domain vocabulary (ADR-005) so no Axios type escapes infrastructure.
-  if (axios.isCancel(error)) return new DataAccessError('cancelled', error.message);
+  if (isCancel(error)) return new DataAccessError('cancelled', error.message);
 
   const status = error.response?.status ?? 0;
   const data = error.response?.data as Record<string, unknown> | undefined;

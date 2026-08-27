@@ -29,17 +29,20 @@ describe('SourceRoutedRepositoryRepository', () => {
     const routed = new SourceRoutedRepositoryRepository(registry, () => selection.current);
 
     await routed.search('react', 2);
-    expect(registry.github.repositories.search).toHaveBeenCalledWith('react', 2);
+    expect(registry.github.repositories.search).toHaveBeenCalledWith('react', 2, undefined);
     expect(registry.gitlab.repositories.search).not.toHaveBeenCalled();
 
     selection.set('gitlab');
 
-    await routed.search('react', 1);
-    await routed.findByOwnerAndName('gitlab-org', 'gitlab-foss');
-    expect(registry.gitlab.repositories.search).toHaveBeenCalledWith('react', 1);
+    const { signal } = new AbortController();
+
+    await routed.search('react', 1, { signal });
+    await routed.findByOwnerAndName('gitlab-org', 'gitlab-foss', { signal });
+    expect(registry.gitlab.repositories.search).toHaveBeenCalledWith('react', 1, { signal });
     expect(registry.gitlab.repositories.findByOwnerAndName).toHaveBeenCalledWith(
       'gitlab-org',
       'gitlab-foss',
+      { signal },
     );
     expect(registry.github.repositories.search).toHaveBeenCalledTimes(1);
   });
@@ -51,11 +54,14 @@ describe('SourceRoutedIssueRepository', () => {
     const selection = new DataSourceSelection('gitlab');
     const routed = new SourceRoutedIssueRepository(registry, () => selection.current);
 
-    await routed.findOpenByRepository('gitlab-org', 'gitlab-foss', 5);
+    const { signal } = new AbortController();
+
+    await routed.findOpenByRepository('gitlab-org', 'gitlab-foss', 5, { signal });
     expect(registry.gitlab.issues.findOpenByRepository).toHaveBeenCalledWith(
       'gitlab-org',
       'gitlab-foss',
       5,
+      { signal },
     );
 
     selection.set('github');
@@ -65,6 +71,7 @@ describe('SourceRoutedIssueRepository', () => {
       'facebook',
       'react',
       1,
+      undefined,
     );
   });
 });

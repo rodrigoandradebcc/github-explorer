@@ -69,7 +69,9 @@ describe('ListRepoIssuesUseCase', () => {
       page: 2,
     });
 
-    expect(issues.findOpenByRepository).toHaveBeenNthCalledWith(2, 'example', 'repo', 3);
+    expect(issues.findOpenByRepository).toHaveBeenNthCalledWith(2, 'example', 'repo', 3, {
+      signal: undefined,
+    });
     expect(result.items[0]?.id).toBe(2);
   });
 
@@ -102,5 +104,30 @@ describe('ListRepoIssuesUseCase', () => {
       new ListRepoIssuesUseCase(issues).execute({ owner: 'example', repository: 'repo' }),
     ).rejects.toThrow('Issue pagination returned a repeated page.');
     expect(issues.findOpenByRepository).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards the abort signal on every page it walks past pull requests', async () => {
+    const issues = makeIssuePort();
+    issues.findOpenByRepository
+      .mockResolvedValueOnce({
+        items: [makeIssue({ isPullRequest: true })],
+        total: null,
+        nextPage: 2,
+      })
+      .mockResolvedValueOnce({ items: [makeIssue({ id: 2 })], total: null, nextPage: null });
+    const { signal } = new AbortController();
+
+    await new ListRepoIssuesUseCase(issues).execute({
+      owner: 'example',
+      repository: 'repo',
+      signal,
+    });
+
+    expect(issues.findOpenByRepository).toHaveBeenNthCalledWith(1, 'example', 'repo', 1, {
+      signal,
+    });
+    expect(issues.findOpenByRepository).toHaveBeenNthCalledWith(2, 'example', 'repo', 2, {
+      signal,
+    });
   });
 });
