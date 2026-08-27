@@ -37,6 +37,6 @@ describe('Avatar', () => {
   it('is circular (borderRadius = dimension / 2)', () => {
     renderWithTheme(<Avatar testID="av" fallback="AB" size="md" />);
     const container = screen.getByTestId('av');
-    expect(container.props.style.borderRadius).toBe(24); // 48 / 2
+    expect(container.props.style.borderRadius).toBe(24);
   });
 });

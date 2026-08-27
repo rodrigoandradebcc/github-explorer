@@ -1,6 +1,5 @@
 // Public API — screens should only import from here
 
-// Theme
 export { ThemeProvider, useTheme } from './theme/ThemeProvider';
 export type { Theme, ThemeMode, ThemeProviderProps } from './theme/ThemeProvider';
 export type { ThemePreferenceStorage } from './theme/ThemePreferenceStorage';
@@ -11,7 +10,6 @@ export type { RadiusKey } from './tokens/radius';
 export type { SizeKey } from './tokens/sizes';
 export type { SpacingKey } from './tokens/spacing';
 
-// Components
 export { Avatar } from './components/Avatar';
 export type { AvatarProps, AvatarSize } from './components/Avatar';
 

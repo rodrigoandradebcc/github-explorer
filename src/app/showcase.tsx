@@ -26,8 +26,6 @@ import type {
   SpacingKey,
 } from '@/design-system';
 
-// ── Local helpers ─────────────────────────────────────────────────────────────
-
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const { colors } = useTheme();
   return (
@@ -63,8 +61,6 @@ const variantLabels: Record<ButtonVariant, string> = {
   ghost: 'FANTASMA',
 };
 
-// ── Screen ────────────────────────────────────────────────────────────────────
-
 export default function ShowcaseScreen() {
   const { colors, spacing, radius, mode, toggleMode } = useTheme();
   const [controlled, setControlled] = useState('');
@@ -81,7 +77,6 @@ export default function ShowcaseScreen() {
       />
       <ScrollView>
         <Box padding="md" direction="column" gap="xl" paddingBottom="xl">
-          {/* ── 1. Tema ──────────────────────────────────────────────── */}
           <Section title="Tema">
             <Card>
               <Box direction="row" align="center" justify="space-between">
@@ -96,7 +91,6 @@ export default function ShowcaseScreen() {
             </Card>
           </Section>
 
-          {/* ── 2. Cores ─────────────────────────────────────────────── */}
           <Section title="Cores">
             <Box direction="column" gap="sm">
               {(Object.entries(colors) as [ColorKey, string][]).map(([key, value]) => (
@@ -123,7 +117,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 3. Espaçamento ───────────────────────────────────────── */}
           <Section title="Espaçamento">
             <Box direction="column" gap="sm">
               {(Object.entries(spacing) as [SpacingKey, number][]).map(([key, value]) => (
@@ -146,7 +139,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 4. Tipografia ────────────────────────────────────────── */}
           <Section title="Tipografia">
             <Box direction="column" gap="lg">
               <Box direction="column" gap="xs">
@@ -189,7 +181,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 5. Botões ────────────────────────────────────────────── */}
           <Section title="Botões">
             <Box direction="column" gap="md">
               {(['primary', 'outline', 'ghost'] as ButtonVariant[]).map((variant) => (
@@ -219,7 +210,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 6. Campos ────────────────────────────────────────────── */}
           <Section title="Campos">
             <Box direction="column" gap="md">
               <Input label="Vazio" value="" onChangeText={() => {}} placeholder="Placeholder…" />
@@ -246,7 +236,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 7. Cards ─────────────────────────────────────────────── */}
           <Section title="Cards">
             <Box direction="column" gap="sm">
               {(['sm', 'md', 'lg'] as CardPadding[]).map((p) => (
@@ -262,7 +251,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 8. Badges ────────────────────────────────────────────── */}
           <Section title="Badges">
             <Box direction="column" gap="sm">
               {(['default', 'success', 'warning', 'danger', 'info'] as BadgeTone[]).map((tone) => (
@@ -280,7 +268,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 9. Avatares ──────────────────────────────────────────── */}
           <Section title="Avatares">
             <Box direction="column" gap="md">
               <Box direction="column" gap="xs">
@@ -307,7 +294,6 @@ export default function ShowcaseScreen() {
             </Box>
           </Section>
 
-          {/* ── 10. Skeletons ────────────────────────────────────────── */}
           <Section title="Skeletons">
             <Card>
               <Box direction="column" gap="sm">

@@ -8,8 +8,6 @@ import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';
 
-// ── mocks ─────────────────────────────────────────────────────────────────────
-
 const mockPush = jest.fn();
 
 jest.mock('expo-router', () => ({
@@ -20,8 +18,6 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/presentation/repositories/hooks/useRepoDetails');
 const mockHook = useRepoDetails as jest.MockedFunction<typeof useRepoDetails>;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 const makeDetail = (overrides: Partial<RepoDetails> = {}): RepoDetails => ({
   id: 1,
@@ -64,8 +60,6 @@ function withData(overrides: Partial<ReturnType<typeof useRepoDetails>> = {}) {
     ...overrides,
   } as unknown as ReturnType<typeof useRepoDetails>);
 }
-
-// ── tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   jest.clearAllMocks();

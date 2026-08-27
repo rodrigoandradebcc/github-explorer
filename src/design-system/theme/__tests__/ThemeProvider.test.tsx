@@ -85,7 +85,6 @@ describe('ThemeProvider', () => {
       </ThemeProvider>,
     );
 
-    // wait for the useEffect to resolve
     await act(async () => {});
 
     expect(storage.load).toHaveBeenCalledTimes(1);

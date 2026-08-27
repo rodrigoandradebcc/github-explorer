@@ -8,8 +8,6 @@ import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { IssuesScreen } from '../IssuesScreen';
 
-// ── mocks ─────────────────────────────────────────────────────────────────────
-
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ owner: 'facebook', repo: 'react' }),
   Stack: { Screen: () => null },
@@ -17,8 +15,6 @@ jest.mock('expo-router', () => ({
 
 jest.mock('@/presentation/issues/hooks/useRepoIssues');
 const mockHook = useRepoIssues as jest.MockedFunction<typeof useRepoIssues>;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 const makeIssue = (overrides: Partial<Issue> = {}): Issue => ({
   id: 1,
@@ -57,8 +53,6 @@ function withData(overrides: Partial<ReturnType<typeof useRepoIssues>> = {}) {
     ...overrides,
   } as unknown as ReturnType<typeof useRepoIssues>);
 }
-
-// ── tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   jest.clearAllMocks();

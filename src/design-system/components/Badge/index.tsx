@@ -13,7 +13,6 @@ export interface BadgeProps {
   testID?: string;
 }
 
-// alpha suffix for transparent tinted backgrounds
 const BG_ALPHA = '26'; // ~15% opacity
 const BORDER_ALPHA = '66'; // ~40% opacity
 

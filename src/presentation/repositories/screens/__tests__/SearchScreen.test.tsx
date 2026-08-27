@@ -8,8 +8,6 @@ import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { SearchScreen } from '../SearchScreen';
 
-// ── mocks ─────────────────────────────────────────────────────────────────────
-
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
   Stack: { Screen: () => null },
@@ -18,8 +16,6 @@ jest.mock('expo-router', () => ({
 jest.mock('@/presentation/repositories/hooks/useSearchRepos');
 
 const mockHook = useSearchRepos as jest.MockedFunction<typeof useSearchRepos>;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 const makeRepo = (overrides: Partial<Repo> = {}): Repo => ({
   id: 1,
@@ -60,8 +56,6 @@ function idleHook(overrides = {}) {
   } as unknown as ReturnType<typeof useSearchRepos>);
 }
 
-// ── tests ─────────────────────────────────────────────────────────────────────
-
 beforeEach(() => {
   jest.clearAllMocks();
   idleHook();
@@ -83,10 +77,6 @@ describe('SearchScreen', () => {
 
     renderWithProviders(<SearchScreen />);
 
-    // Simulate typing to set a debouncedQuery — but since debounce is 500ms
-    // and loading=true, after the debounce fires the skeletons should appear.
-    // We advance by triggering the hook directly via the isLoading flag.
-    // The skeleton should be visible once query is set + isLoading = true.
     fireEvent.changeText(screen.getByTestId('search-input'), 'react');
 
     await waitFor(() => {
