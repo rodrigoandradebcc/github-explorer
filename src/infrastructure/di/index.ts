@@ -1,1 +1,7 @@
-export { dataSourceSelection, issueService, repoService } from './container';
+export {
+  dataSourcePreference,
+  dataSourceSelection,
+  issueService,
+  repoService,
+  themePreference,
+} from './container';

@@ -1,5 +1,8 @@
 import React, { createContext, use, useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { ThemeMode } from '@/domain/shared/Theme';
+import type { ThemePreferenceStorage } from '@/domain/shared/ThemePreferenceStorage';
+
 import { darkColors, lightColors, type ColorPalette } from '../tokens/colors';
 import type { Radius } from '../tokens/radius';
 import radius from '../tokens/radius';
@@ -7,9 +10,6 @@ import type { Sizes } from '../tokens/sizes';
 import sizes from '../tokens/sizes';
 import type { Spacing } from '../tokens/spacing';
 import spacing from '../tokens/spacing';
-import type { ThemePreferenceStorage } from './ThemePreferenceStorage';
-
-export type ThemeMode = 'light' | 'dark';
 
 export interface Theme {
   colors: ColorPalette;

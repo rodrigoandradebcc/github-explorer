@@ -15,5 +15,3 @@ export class AsyncStorageDataSourcePreference implements DataSourcePreferenceSto
     await AsyncStorage.setItem(STORAGE_KEY, source);
   }
 }
-
-export const asyncStorageDataSourcePreference = new AsyncStorageDataSourcePreference();

@@ -10,6 +10,14 @@ const layer = (name, groups) => ({
   message: `${name} (${RULES_DOC} §3).`,
 });
 
+const INFRA_UI_PATTERNS = [
+  '@/presentation',
+  '@/presentation/**',
+  '@/app/**',
+  '@/design-system',
+  '@/design-system/**',
+];
+
 module.exports = defineConfig([
   ...expoConfig,
   prettierConfig,
@@ -116,7 +124,7 @@ module.exports = defineConfig([
         'error',
         {
           patterns: [
-            layer('design-system/ é biblioteca fechada, só importa a si mesmo', [
+            layer('design-system/ é biblioteca fechada: só a si mesmo e ports de domain/', [
               '@/application',
               '@/application/**',
               '@/infrastructure',
@@ -127,6 +135,36 @@ module.exports = defineConfig([
               '@react-native-async-storage/**',
             ]),
           ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['src/infrastructure/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            layer('infrastructure/ não conhece UI', INFRA_UI_PATTERNS),
+            layer('application/ só entra pela infrastructure/di/container.ts', [
+              '@/application',
+              '@/application/**',
+            ]),
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['src/infrastructure/di/container.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [layer('infrastructure/ não conhece UI', INFRA_UI_PATTERNS)],
         },
       ],
     },

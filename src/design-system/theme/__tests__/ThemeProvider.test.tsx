@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
 
 import { ThemeProvider, useTheme } from '../ThemeProvider';
-import type { ThemePreferenceStorage } from '../ThemePreferenceStorage';
+import type { ThemePreferenceStorage } from '@/domain/shared/ThemePreferenceStorage';
 
 function fakeStorage(
   overrides: Partial<ThemePreferenceStorage> = {},

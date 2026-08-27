@@ -1,4 +1,4 @@
-import type { ThemeMode } from './ThemeProvider';
+import type { ThemeMode } from './Theme';
 
 export interface ThemePreferenceStorage {
   load(): Promise<ThemeMode | null>;

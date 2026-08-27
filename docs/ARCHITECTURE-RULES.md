@@ -29,7 +29,7 @@ Clean Architecture + Ports & Adapters. Cinco camadas, dependência sempre aponta
 | `domain/` | **nada** |
 | `application/` | só `domain/` — sem exceção |
 | `infrastructure/` | `domain/`; `application/` apenas em `di/container.ts` |
-| `design-system/` | só a si mesmo |
+| `design-system/` | só a si mesmo e `domain/` (tipos e ports de preferência) |
 | `presentation/` | `application/` (tipos), `domain/`, `design-system/`; `infrastructure/` só nos providers de `di/` |
 | `app/` | `presentation/`, `design-system/`, `infrastructure/` (só para injetar no composition root) |
 
@@ -44,7 +44,8 @@ src/
 │   ├── errors/            DataAccessError (kind: rateLimit|notFound|network|unknown) + isRateLimitError
 │   ├── repositories/      RepoRepository, IssueRepository   (ports)
 │   └── shared/            Page<T>, DataSource (DATA_SOURCE_IDS/DataSourceId),
-│                          DataSourceSelection, DataSourcePreferenceStorage
+│                          DataSourceSelection, DataSourcePreferenceStorage,
+│                          Theme (THEME_MODES/ThemeMode), ThemePreferenceStorage
 ├── application/
 │   ├── repositories/      SearchReposUseCase, GetRepoDetailsUseCase, RepoService
 │   └── issues/            ListRepoIssuesUseCase, IssueService
@@ -144,6 +145,10 @@ npm run verify   # type-check + lint + test
 
 As regras da §3 são impostas por `no-restricted-imports` em `eslint.config.js`, um bloco por camada.
 Import de camada proibida é **erro de lint**, não achado de revisão. A mensagem cita esta seção.
+
+`infrastructure/` tem dois blocos: o geral, que também barra `application/`, e o de
+`di/container.ts`, que reabre `application/` — a exceção da §3. São dois porque em flat config
+a opção de uma mesma regra é substituída, não mesclada.
 
 `presentation/` não tem exceção: infraestrutura entra só por `app/_layout.tsx`, injetada nos providers.
 

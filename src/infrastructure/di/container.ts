@@ -12,12 +12,17 @@ import { AxiosGitLabIssueDataSource } from '@/infrastructure/gitlab/AxiosGitLabI
 import { AxiosGitLabRepoDataSource } from '@/infrastructure/gitlab/AxiosGitLabRepoDataSource';
 import { GitLabIssueRepository } from '@/infrastructure/gitlab/GitLabIssueRepository';
 import { GitLabRepoRepository } from '@/infrastructure/gitlab/GitLabRepoRepository';
+import { AsyncStorageDataSourcePreference } from '@/infrastructure/storage/AsyncStorageDataSourcePreference';
+import { AsyncStorageThemePreference } from '@/infrastructure/storage/AsyncStorageThemePreference';
 
 import type { DataSourceRegistry } from './DataSourceRegistry';
 import { SourceRoutedIssueRepository } from './SourceRoutedIssueRepository';
 import { SourceRoutedRepoRepository } from './SourceRoutedRepoRepository';
 
 export const dataSourceSelection = new DataSourceSelection('github');
+
+export const dataSourcePreference = new AsyncStorageDataSourcePreference();
+export const themePreference = new AsyncStorageThemePreference();
 
 const registry: DataSourceRegistry = {
   github: {
