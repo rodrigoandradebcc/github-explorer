@@ -219,6 +219,16 @@ Essas fronteiras não dependem de disciplina em revisão: `eslint.config.js` dec
 proibida quebra `npm run lint` no momento em que é digitado
 ([ADR-010](docs/decisions/010-enforce-layer-boundaries-in-lint.md)).
 
+Os cinco princípios obrigatórios têm uma seção cada:
+
+| Princípio | Seção | Como é garantido |
+| --- | --- | --- |
+| Inversão de Dependência | [↓](#inversão-de-dependência) | ports em `domain/`, `implements` na infraestrutura, `new` só no container |
+| Interfaces antes de implementações | [↓](#interfaces-antes-de-implementações) | 8 contratos em arquivo próprio, 12 implementações, `implements` explícito |
+| Domínio isolado | [↓](#domínio-isolado) | `no-restricted-imports` bloqueia toda camada e todo framework em `src/domain` |
+| Camada de application separada | [↓](#camada-de-application-separada) | única dependência permitida é `domain/`, verificada no lint |
+| Apresentação desacoplada | [↓](#apresentação-desacoplada) | zero import de infraestrutura, Axios ou AsyncStorage; injeção só em `app/_layout.tsx` |
+
 ### Inversão de Dependência
 
 Regra de negócio não depende de HTTP, de storage nem de biblioteca externa. As duas pontas dependem
@@ -251,7 +261,7 @@ alterar uma linha de `domain/` ou `application/`. Veja o
 [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md) e o
 [ADR-002](docs/decisions/002-application-layer-use-cases.md).
 
-### Contratos antes de implementações
+### Interfaces antes de implementações
 
 Repositórios, datasources e serviços externos são declarados como interface em um arquivo e
 implementados em outro. São oito contratos e doze implementações, todas com `implements` explícito —
@@ -284,26 +294,27 @@ jamais chama.
 A entidade se chama `Repo`, e não `Repository`, porque o sufixo `Repository` já pertence ao padrão de
 port — ver [ADR-008](docs/decisions/008-name-the-repository-entity-repo.md).
 
-### Camadas na raiz e organização por feature
+### Domínio isolado
 
-As fronteiras arquiteturais ficam explícitas na raiz de `src/`: `domain/`, `application/`,
-`infrastructure/`, `presentation/`, `design-system/` e `app/`. Dentro de `presentation/`, o código
-continua agrupado por feature (`repositories`, `issues`) em vez de ser achatado em pastas globais
-como `screens/`, `hooks/` e `components/`. Tudo que pertence a uma feature permanece co-localizado;
-adicionar uma nova feature significa criar uma pasta sem alterar as existentes.
+Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
+TanStack Query ou qualquer outra dependência externa. Os formatos retornados pelo GitHub permanecem
+em `src/infrastructure/github/dtos.ts`, os do GitLab em `src/infrastructure/gitlab/dtos.ts`, e
+ambos são convertidos para as mesmas entidades por mappers na borda da aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
+repository fazem mapeamento e paginação, enquanto o use case de issues mantém o filtro e a
+repaginação de pull requests — limitada a cinco páginas por chamada, devolvendo `nextPage` para que
+continuar a busca seja uma escolha de quem está na tela e não um gasto silencioso de rate limit
+([ADR-009](docs/decisions/009-bound-the-issue-page-scan.md)). Assim, particularidades da API não vazam para telas e componentes.
+Veja o [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
 
-```
-src/presentation/
-├── repositories/     # busca, detalhe, componentes e hooks de repositório
-├── issues/           # listagem, componentes e hooks de issues
-├── shared/           # utilitários, componentes e navegação transversais à apresentação
-└── di/               # providers de serviços, server state e fonte de dados
-```
+### Camada de application separada
 
-Os hooks resolvem `RepoService` e `IssueService` pelo `ApplicationProvider`, evitando imports de
-singletons em tempo de módulo e permitindo injetar fakes em testes. A configuração do TanStack
-Query também vive em `presentation/`, mantendo as rotas do Expo Router como wrappers finos. Veja o
-[ADR-003](docs/decisions/003-presentation-layer-and-dependency-injection.md).
+Use cases representam uma operação do sistema e concentram validação e orquestração do domínio por
+meio das interfaces de repositório. Services são fachadas finas que agrupam os use cases de cada
+agregado e oferecem uma superfície estável para os hooks. Apenas o composition root em
+`infrastructure/di/container.ts` conhece os adapters concretos: ele injeta as implementações nos use
+cases e monta os services sem uma biblioteca de DI. Assim, React Query continua responsável por
+cache e estado assíncrono, mas não carrega regras de negócio nem conhece infraestrutura. Veja o
+[ADR-002](docs/decisions/002-application-layer-use-cases.md).
 
 ### Apresentação desacoplada
 
@@ -326,27 +337,26 @@ erro nomeado em vez de cair no container de produção — o que antes fazia um 
 rede de verdade, em silêncio. Veja o
 [ADR-010](docs/decisions/010-enforce-layer-boundaries-in-lint.md).
 
-### Domínio independente da API
+### Camadas na raiz e organização por feature
 
-Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
-TanStack Query ou qualquer outra dependência externa. Os formatos retornados pelo GitHub permanecem
-em `src/infrastructure/github/dtos.ts`, os do GitLab em `src/infrastructure/gitlab/dtos.ts`, e
-ambos são convertidos para as mesmas entidades por mappers na borda da aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
-repository fazem mapeamento e paginação, enquanto o use case de issues mantém o filtro e a
-repaginação de pull requests — limitada a cinco páginas por chamada, devolvendo `nextPage` para que
-continuar a busca seja uma escolha de quem está na tela e não um gasto silencioso de rate limit
-([ADR-009](docs/decisions/009-bound-the-issue-page-scan.md)). Assim, particularidades da API não vazam para telas e componentes.
-Veja o [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
+As fronteiras arquiteturais ficam explícitas na raiz de `src/`: `domain/`, `application/`,
+`infrastructure/`, `presentation/`, `design-system/` e `app/`. Dentro de `presentation/`, o código
+continua agrupado por feature (`repositories`, `issues`) em vez de ser achatado em pastas globais
+como `screens/`, `hooks/` e `components/`. Tudo que pertence a uma feature permanece co-localizado;
+adicionar uma nova feature significa criar uma pasta sem alterar as existentes.
 
-### Use cases e services de aplicação
+```
+src/presentation/
+├── repositories/     # busca, detalhe, componentes e hooks de repositório
+├── issues/           # listagem, componentes e hooks de issues
+├── shared/           # utilitários, componentes e navegação transversais à apresentação
+└── di/               # providers de serviços, server state e fonte de dados
+```
 
-Use cases representam uma operação do sistema e concentram validação e orquestração do domínio por
-meio das interfaces de repositório. Services são fachadas finas que agrupam os use cases de cada
-agregado e oferecem uma superfície estável para os hooks. Apenas o composition root em
-`infrastructure/di/container.ts` conhece os adapters concretos: ele injeta as implementações nos use
-cases e monta os services sem uma biblioteca de DI. Assim, React Query continua responsável por
-cache e estado assíncrono, mas não carrega regras de negócio nem conhece infraestrutura. Veja o
-[ADR-002](docs/decisions/002-application-layer-use-cases.md).
+Os hooks resolvem `RepoService` e `IssueService` pelo `ApplicationProvider`, evitando imports de
+singletons em tempo de módulo e permitindo injetar fakes em testes. A configuração do TanStack
+Query também vive em `presentation/`, mantendo as rotas do Expo Router como wrappers finos. Veja o
+[ADR-003](docs/decisions/003-presentation-layer-and-dependency-injection.md).
 
 ### Fronteiras de infraestrutura
 
