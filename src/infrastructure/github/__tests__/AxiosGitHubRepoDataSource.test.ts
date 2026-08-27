@@ -9,14 +9,14 @@ const mockGet = apiClient.get as jest.Mock;
 beforeEach(() => jest.clearAllMocks());
 
 describe('AxiosGitHubRepoDataSource', () => {
-  it('requests a repository search with the expected path and params', async () => {
+  it('requests a repository search sorted by stars with the expected path and params', async () => {
     const response = { total_count: 0, incomplete_results: false, items: [] };
     mockGet.mockResolvedValueOnce({ data: response });
 
     const result = await new AxiosGitHubRepoDataSource().searchRepositories('react', 2);
 
     expect(mockGet).toHaveBeenCalledWith('/search/repositories', {
-      params: { q: 'react', page: 2, per_page: 20 },
+      params: { q: 'react', sort: 'stars', order: 'desc', page: 2, per_page: 20 },
       signal: undefined,
     });
     expect(result).toBe(response);
@@ -41,7 +41,7 @@ describe('AxiosGitHubRepoDataSource', () => {
     await dataSource.getRepository('facebook', 'react', { signal });
 
     expect(mockGet).toHaveBeenNthCalledWith(1, '/search/repositories', {
-      params: { q: 'react', page: 1, per_page: 20 },
+      params: { q: 'react', sort: 'stars', order: 'desc', page: 1, per_page: 20 },
       signal,
     });
     expect(mockGet).toHaveBeenNthCalledWith(2, '/repos/facebook/react', { signal });

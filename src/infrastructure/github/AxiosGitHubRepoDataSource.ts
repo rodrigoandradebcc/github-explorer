@@ -9,7 +9,10 @@ export class AxiosGitHubRepoDataSource implements GitHubRepoDataSource {
   async searchRepositories(query: string, page: number, options: RequestOptions = {}) {
     const { data } = await apiClient.get<GitHubSearchRepositoriesResponseDto>(
       '/search/repositories',
-      { params: { q: query, page, per_page: GITHUB_PAGE_SIZE }, signal: options.signal },
+      {
+        params: { q: query, sort: 'stars', order: 'desc', page, per_page: GITHUB_PAGE_SIZE },
+        signal: options.signal,
+      },
     );
     return data;
   }
