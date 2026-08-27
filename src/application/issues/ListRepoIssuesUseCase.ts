@@ -3,6 +3,8 @@ import { isPullRequest } from '@/domain/entities/issueRules';
 import type { IssueRepository } from '@/domain/repositories/IssueRepository';
 import type { Page } from '@/domain/shared/Page';
 
+export const MAX_PAGES_SCANNED = 5;
+
 export interface ListRepoIssuesInput {
   owner: string;
   repository: string;
@@ -26,10 +28,15 @@ export class ListRepoIssuesUseCase {
     if (!normalizedRepository) throw new Error('Repository name is required.');
 
     let currentPage = page;
+    let lastTotal: number | null = null;
     const visitedPages = new Set<number>();
 
-    while (!visitedPages.has(currentPage)) {
+    for (let scanned = 0; scanned < MAX_PAGES_SCANNED; scanned += 1) {
+      if (visitedPages.has(currentPage)) {
+        throw new Error('Issue pagination returned a repeated page.');
+      }
       visitedPages.add(currentPage);
+
       const result = await this.issues.findOpenByRepository(
         normalizedOwner,
         normalizedRepository,
@@ -37,6 +44,7 @@ export class ListRepoIssuesUseCase {
         { signal },
       );
       const openIssues = result.items.filter((issue) => !isPullRequest(issue));
+      lastTotal = result.total;
 
       if (openIssues.length > 0 || result.nextPage === null) {
         return { ...result, items: openIssues };
@@ -45,6 +53,6 @@ export class ListRepoIssuesUseCase {
       currentPage = result.nextPage;
     }
 
-    throw new Error('Issue pagination returned a repeated page.');
+    return { items: [], total: lastTotal, nextPage: currentPage };
   }
 }

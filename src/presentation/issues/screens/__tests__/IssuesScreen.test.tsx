@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 import React from 'react';
 
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
@@ -96,6 +96,31 @@ describe('IssuesScreen', () => {
     });
     renderWithProviders(<IssuesScreen />);
     expect(screen.getByTestId('issues-empty')).toBeTruthy();
+  });
+
+  it('offers to keep scanning when the budget ran out before finding an issue', () => {
+    const fetchNextPage = jest.fn();
+    withData({
+      data: { pages: [{ items: [], total: null, nextPage: 6 }], pageParams: [1] },
+      hasNextPage: true,
+      fetchNextPage,
+    });
+    renderWithProviders(<IssuesScreen />);
+
+    fireEvent.press(screen.getByTestId('issues-continue-button'));
+
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer to keep scanning when the repository truly has no issues', () => {
+    withData({
+      data: { pages: [{ items: [], total: null, nextPage: null }], pageParams: [1] },
+      hasNextPage: false,
+    });
+    renderWithProviders(<IssuesScreen />);
+
+    expect(screen.getByTestId('issues-empty')).toBeTruthy();
+    expect(screen.queryByTestId('issues-continue-button')).toBeNull();
   });
 
   it('renders issues list when data is available', () => {

@@ -89,7 +89,10 @@ export function IssuesScreen() {
     return (
       <>
         <Stack.Screen options={headerOptions} />
-        <IssuesEmptyState />
+        <IssuesEmptyState
+          onContinue={hasNextPage ? handleEndReached : undefined}
+          isContinuing={isFetchingNextPage}
+        />
       </>
     );
   }

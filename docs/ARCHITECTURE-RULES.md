@@ -75,7 +75,7 @@ Ordem obrigatória — de dentro para fora. Cada passo compila e testa sozinho.
 1. **Domínio** — criar entidade em `domain/entities/`. Campos em camelCase, datas como `Date`. Regra pura vai em `*Rules.ts` ao lado, como função exportada.
 2. **Port** — declarar a interface do repositório em `domain/repositories/`. Métodos falam a língua do negócio, retornam entidade ou `Page<T>`. Zero vocabulário de HTTP.
 3. **Use case** — em `application/<módulo>/<Ação>UseCase.ts`. Classe, port injetada por construtor, método público único `execute(input)`. Validação de entrada mora aqui.
-4. **Service** — em `application/<módulo>/<Módulo>Service.ts`. Agrupa os use cases do módulo, só delega. É a superfície que a UI consome.
+4. **Service** — em `application/<módulo>/<Módulo>Service.ts`. Agrupa os use cases do módulo, só delega. É a superfície que a UI consome — `application/index.ts` exporta só services e tipos de input; classe de use case não sai pelo barrel.
 5. **DTO + mapper** — `infrastructure/<provider>/dtos.ts` guarda o formato cru (snake_case). `mappers.ts` converte DTO → entidade. É aqui que o vocabulário externo morre.
 6. **Datasource** — port em `infrastructure/<provider>/<Provider><Módulo>DataSource.ts`, implementação em `Axios<Provider><Módulo>DataSource.ts`. Uma port por repositório, não uma compartilhada.
 7. **Adapter de repositório** — `<Provider><Módulo>Repository.ts` com `implements` do port de domínio. Recebe a datasource por construtor.

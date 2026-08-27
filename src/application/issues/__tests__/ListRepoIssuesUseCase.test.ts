@@ -1,7 +1,7 @@
 import type { Issue } from '@/domain/entities/Issue';
 import type { IssueRepository } from '@/domain/repositories/IssueRepository';
 
-import { ListRepoIssuesUseCase } from '../ListRepoIssuesUseCase';
+import { ListRepoIssuesUseCase, MAX_PAGES_SCANNED } from '../ListRepoIssuesUseCase';
 
 function makeIssue(overrides: Partial<Issue> = {}): Issue {
   return {
@@ -129,5 +129,38 @@ describe('ListRepoIssuesUseCase', () => {
     expect(issues.findOpenByRepository).toHaveBeenNthCalledWith(2, 'example', 'repo', 2, {
       signal,
     });
+  });
+
+  it('stops after the scan budget and hands the next page back to the caller', async () => {
+    const issues = makeIssuePort();
+    issues.findOpenByRepository.mockImplementation((_owner, _repository, page = 1) =>
+      Promise.resolve({
+        items: [makeIssue({ isPullRequest: true })],
+        total: 240,
+        nextPage: page + 1,
+      }),
+    );
+
+    const result = await new ListRepoIssuesUseCase(issues).execute({
+      owner: 'example',
+      repository: 'repo',
+    });
+
+    expect(issues.findOpenByRepository).toHaveBeenCalledTimes(MAX_PAGES_SCANNED);
+    expect(result).toEqual({ items: [], total: 240, nextPage: MAX_PAGES_SCANNED + 1 });
+  });
+
+  it('keeps rejecting a repeated page instead of spending the budget on it', async () => {
+    const issues = makeIssuePort();
+    issues.findOpenByRepository.mockResolvedValue({
+      items: [makeIssue({ isPullRequest: true })],
+      total: null,
+      nextPage: 1,
+    });
+
+    await expect(
+      new ListRepoIssuesUseCase(issues).execute({ owner: 'example', repository: 'repo' }),
+    ).rejects.toThrow('Issue pagination returned a repeated page.');
+    expect(issues.findOpenByRepository).toHaveBeenCalledTimes(1);
   });
 });
