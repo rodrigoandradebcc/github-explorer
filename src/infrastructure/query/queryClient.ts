@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 
-import { isRateLimitError } from '@/domain/errors/DataAccessError';
+import { isCancelledError, isRateLimitError } from '@/domain/errors/DataAccessError';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -9,6 +9,7 @@ export function createQueryClient(): QueryClient {
         staleTime: 5 * 60 * 1000,
         retry: (failureCount, error) => {
           if (isRateLimitError(error)) return false;
+          if (isCancelledError(error)) return false;
           return failureCount < 1;
         },
         refetchOnWindowFocus: false,

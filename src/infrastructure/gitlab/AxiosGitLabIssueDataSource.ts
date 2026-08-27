@@ -1,3 +1,5 @@
+import type { RequestOptions } from '@/domain/shared/RequestOptions';
+
 import { apiClient } from './client';
 import { GITLAB_PAGE_SIZE } from './constants';
 import type { GitLabIssueDto } from './dtos';
@@ -5,10 +7,13 @@ import type { GitLabIssueDataSource } from './GitLabIssueDataSource';
 import { toPageDto } from './pageHeaders';
 
 export class AxiosGitLabIssueDataSource implements GitLabIssueDataSource {
-  async listOpenIssues(fullPath: string, page: number) {
+  async listOpenIssues(fullPath: string, page: number, options: RequestOptions = {}) {
     const response = await apiClient.get<GitLabIssueDto[]>(
       `/projects/${encodeURIComponent(fullPath)}/issues`,
-      { params: { state: 'opened', page, per_page: GITLAB_PAGE_SIZE } },
+      {
+        params: { state: 'opened', page, per_page: GITLAB_PAGE_SIZE },
+        signal: options.signal,
+      },
     );
     return toPageDto(response.data, response.headers as Record<string, unknown>);
   }

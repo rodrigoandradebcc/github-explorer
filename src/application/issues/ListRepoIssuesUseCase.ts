@@ -7,12 +7,18 @@ export interface ListRepoIssuesInput {
   owner: string;
   repository: string;
   page?: number;
+  signal?: AbortSignal;
 }
 
 export class ListRepoIssuesUseCase {
   constructor(private readonly issues: IssueRepository) {}
 
-  async execute({ owner, repository, page = 1 }: ListRepoIssuesInput): Promise<Page<Issue>> {
+  async execute({
+    owner,
+    repository,
+    page = 1,
+    signal,
+  }: ListRepoIssuesInput): Promise<Page<Issue>> {
     const normalizedOwner = owner.trim();
     const normalizedRepository = repository.trim();
 
@@ -28,6 +34,7 @@ export class ListRepoIssuesUseCase {
         normalizedOwner,
         normalizedRepository,
         currentPage,
+        { signal },
       );
       const openIssues = result.items.filter((issue) => !isPullRequest(issue));
 

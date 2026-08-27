@@ -10,7 +10,7 @@ export function useRepoIssues(owner: string, repo: string) {
 
   return useInfiniteQuery({
     queryKey: queryKeys.repositories.issues(scope, owner, repo),
-    queryFn: ({ pageParam }) => issues.listOpen(owner, repo, pageParam),
+    queryFn: ({ pageParam, signal }) => issues.listOpen(owner, repo, pageParam, { signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     enabled: owner.length > 0 && repo.length > 0,

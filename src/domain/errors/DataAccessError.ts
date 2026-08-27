@@ -1,4 +1,9 @@
-export type DataAccessErrorKind = 'rateLimit' | 'notFound' | 'network' | 'unknown';
+export type DataAccessErrorKind =
+  | 'rateLimit'
+  | 'notFound'
+  | 'network'
+  | 'cancelled'
+  | 'unknown';
 
 export class DataAccessError extends Error {
   readonly kind: DataAccessErrorKind;
@@ -12,4 +17,8 @@ export class DataAccessError extends Error {
 
 export function isRateLimitError(error: unknown): boolean {
   return error instanceof DataAccessError && error.kind === 'rateLimit';
+}
+
+export function isCancelledError(error: unknown): boolean {
+  return error instanceof DataAccessError && error.kind === 'cancelled';
 }

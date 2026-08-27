@@ -12,7 +12,7 @@ export function useSearchRepos(query: string) {
 
   return useInfiniteQuery({
     queryKey: queryKeys.repositories.search(scope, query),
-    queryFn: ({ pageParam }) => repositories.search(query, pageParam),
+    queryFn: ({ pageParam, signal }) => repositories.search(query, pageParam, { signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
     enabled: query.trim().length > 0,

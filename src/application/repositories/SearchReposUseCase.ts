@@ -5,15 +5,16 @@ import type { Page } from '@/domain/shared/Page';
 export interface SearchReposInput {
   query: string;
   page?: number;
+  signal?: AbortSignal;
 }
 
 export class SearchReposUseCase {
   constructor(private readonly repositories: RepositoryRepository) {}
 
-  async execute({ query, page = 1 }: SearchReposInput): Promise<Page<Repository>> {
+  async execute({ query, page = 1, signal }: SearchReposInput): Promise<Page<Repository>> {
     const normalizedQuery = query.trim();
     if (!normalizedQuery) return { items: [], total: 0, nextPage: null };
 
-    return this.repositories.search(normalizedQuery, page);
+    return this.repositories.search(normalizedQuery, page, { signal });
   }
 }
