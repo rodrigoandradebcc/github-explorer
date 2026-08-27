@@ -139,11 +139,18 @@ palavra para a entidade produzia `RepositoryRepository`. Vocabulário de provide
 ## 10. Verificação
 
 ```bash
-grep -rn "^import" src/domain --include="*.ts" | grep -v "from '\./\|from '\.\./"   # vazio
-grep -rn "@/infrastructure" src/application                                          # vazio
-grep -rn "async-storage\|@/application\|@/infrastructure" src/design-system           # vazio
-grep -rn "@/infrastructure" src/presentation | grep -v "/di/"                         # vazio
-npm run type-check && npm run lint && npm test
+npm run verify   # type-check + lint + test
+```
+
+As regras da §3 são impostas por `no-restricted-imports` em `eslint.config.js`, um bloco por camada.
+Import de camada proibida é **erro de lint**, não achado de revisão. A mensagem cita esta seção.
+
+`presentation/` não tem exceção: infraestrutura entra só por `app/_layout.tsx`, injetada nos providers.
+
+O lint lê `import`, não `require()` dinâmico. Para esse caso o grep continua valendo:
+
+```bash
+grep -rn "require(" src/domain src/application   # vazio
 ```
 
 ## 11. Erros entre camadas

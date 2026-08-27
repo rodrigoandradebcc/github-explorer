@@ -30,7 +30,7 @@ export function renderWithProviders(
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <DataSourceProvider selection={selection}>
-        <ApplicationProvider services={services}>
+        <ApplicationProvider services={services ?? {}}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider>{children}</ThemeProvider>
           </QueryClientProvider>

@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
 import { ThemeProvider, useTheme } from '@/design-system';
+import { dataSourceSelection, issueService, repoService } from '@/infrastructure/di';
+import { createQueryClient } from '@/infrastructure/query/queryClient';
 import { asyncStorageDataSourcePreference } from '@/infrastructure/storage/AsyncStorageDataSourcePreference';
 import { asyncStorageThemePreference } from '@/infrastructure/storage/AsyncStorageThemePreference';
 import { ApplicationProvider } from '@/presentation/di/ApplicationProvider';
@@ -29,9 +31,9 @@ function ThemedStack() {
 
 export default function RootLayout() {
   return (
-    <DataSourceProvider storage={asyncStorageDataSourcePreference}>
-      <ApplicationProvider>
-        <QueryProvider>
+    <DataSourceProvider selection={dataSourceSelection} storage={asyncStorageDataSourcePreference}>
+      <ApplicationProvider services={{ repoService, issueService }}>
+        <QueryProvider createClient={createQueryClient}>
           <ThemeProvider storage={asyncStorageThemePreference}>
             <ThemedStack />
           </ThemeProvider>

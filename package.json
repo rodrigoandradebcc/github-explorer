@@ -10,7 +10,8 @@
     "test": "jest --watchAll=false",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "verify": "npm run type-check && npm run lint && npm test"
   },
   "jest": {
     "preset": "jest-expo",

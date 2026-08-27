@@ -10,7 +10,6 @@ import React, {
 import type { DataSourceId } from '@/domain/shared/DataSource';
 import type { DataSourcePreferenceStorage } from '@/domain/shared/DataSourcePreferenceStorage';
 import type { DataSourceSelection } from '@/domain/shared/DataSourceSelection';
-import { dataSourceSelection as defaultSelection } from '@/infrastructure/di';
 
 export interface DataSourceContextValue {
   source: DataSourceId;
@@ -25,11 +24,11 @@ const noOpStorage: DataSourcePreferenceStorage = {
 const DataSourceContext = createContext<DataSourceContextValue | null>(null);
 
 export function DataSourceProvider({
-  selection = defaultSelection,
+  selection,
   storage = noOpStorage,
   children,
 }: {
-  selection?: DataSourceSelection;
+  selection: DataSourceSelection;
   storage?: DataSourcePreferenceStorage;
   children: React.ReactNode;
 }) {
