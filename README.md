@@ -5,7 +5,7 @@
 ![Expo SDK](https://img.shields.io/badge/Expo-54-000020?logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61dafb?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/testes-162%20passando-brightgreen?logo=jest&logoColor=white)
+![Tests](https://img.shields.io/badge/testes-184%20passando-brightgreen?logo=jest&logoColor=white)
 
 ---
 
@@ -123,6 +123,7 @@ Ao usar **Expo Go** no celular, escaneie o QR Code exibido no terminal com a câ
 
 | Comando              | Descrição                                        |
 | -------------------- | ------------------------------------------------ |
+| `npm run verify`     | `type-check` + `lint` + `test` — o que roda antes de abrir PR |
 | `npm test`           | Executa o Jest uma vez (sem modo watch)          |
 | `npm run lint`       | ESLint em todos os arquivos fonte                |
 | `npm run type-check` | `tsc --noEmit` — apenas erros de tipo, sem saída |
@@ -143,11 +144,11 @@ src/
 │       └── issues.tsx          # /repository/:owner/:repo/issues → IssuesScreen
 │
 ├── domain/                     # Núcleo sem dependências externas
-│   ├── entities/               # Repository, RepositoryDetails, Issue, IssueLabel, Owner, issueRules
+│   ├── entities/               # Repo, RepoDetails, Issue, IssueLabel, Owner, issueRules
 │   ├── errors/                 # DataAccessError e o guard isRateLimitError
 │   ├── repositories/           # Interfaces dos repositórios (ports)
-│   └── shared/                 # Page<T>, DataSource (ids), DataSourceSelection,
-│                               #   DataSourcePreferenceStorage
+│   └── shared/                 # Page<T>, RequestOptions, DataSource (ids),
+│                               #   DataSourceSelection, DataSourcePreferenceStorage
 │
 ├── application/                # Use cases e services independentes de frameworks
 │   ├── repositories/           # SearchRepos, GetRepoDetails e RepoService
@@ -156,7 +157,7 @@ src/
 ├── infrastructure/             # Adapters concretos e configuração de bibliotecas
 │   ├── di/                     # Composition root manual + DataSourceRegistry
 │   │   ├── container.ts                     # Monta os dois stacks e expõe os services
-│   │   ├── DataSourceRegistry.ts            # Record<DataSourceId, { repositories, issues }>
+│   │   ├── DataSourceRegistry.ts            # Record<DataSourceId, { repos, issues }>
 │   │   └── SourceRouted*Repository.ts       # Ports de domínio que resolvem a fonte ativa
 │   ├── query/                  # Factory e defaults do QueryClient
 │   ├── storage/                # Persistência de tema e de fonte de dados (AsyncStorage)
@@ -213,6 +214,76 @@ nome, padrão de teste por camada e checklist de criação — estão em
 [docs/ARCHITECTURE-RULES.md](docs/ARCHITECTURE-RULES.md). Os arquivos `AGENTS.md`,
 `.claude/rules/`, `.cursor/rules/` e `.github/copilot-instructions.md` são ponteiros para ele.
 
+Essas fronteiras não dependem de disciplina em revisão: `eslint.config.js` declara um bloco de
+`no-restricted-imports` por camada, e a mensagem de erro cita a seção violada. Um import de camada
+proibida quebra `npm run lint` no momento em que é digitado
+([ADR-010](docs/decisions/010-enforce-layer-boundaries-in-lint.md)).
+
+### Inversão de Dependência
+
+Regra de negócio não depende de HTTP, de storage nem de biblioteca externa. As duas pontas dependem
+da mesma abstração — e a abstração pertence à camada de dentro.
+
+| Peça | Onde | Papel |
+| --- | --- | --- |
+| `RepoRepository` | `domain/repositories/` | o contrato, escrito no vocabulário do domínio (`Page<Repo>`, nunca `AxiosResponse`) |
+| `SearchReposUseCase` | `application/repositories/` | recebe o contrato por construtor; não sabe qual fonte existe do outro lado |
+| `GitHubRepoRepository` | `infrastructure/github/` | `implements RepoRepository` |
+| `container.ts` | `infrastructure/di/` | único arquivo do projeto que instancia classe concreta |
+
+```
+SearchReposUseCase ──depende de──▶  RepoRepository  ◀──implements──  GitHubRepoRepository
+     (application)                     (domain)                       (infrastructure)
+```
+
+As duas setas de compilação chegam no mesmo ponto: o contrato do domínio. Nenhuma sai dele. O
+sentido oposto — o use case alcançando o adapter — existe apenas em tempo de execução, montado pelo
+composition root.
+
+A inversão se repete dentro da infraestrutura: `GitHubRepoRepository` depende de
+`GitHubRepoDataSource`, não de Axios. Trocar o cliente HTTP altera uma classe por provedor, e testar
+a regra de paginação não exige rede.
+
+O retorno aparece em dois lugares concretos. `SearchReposUseCase` é testado com um objeto literal que
+implementa o port — sem `jest.mock`, sem servidor, sem simulador. E `SourceRoutedRepoRepository`, que
+implementa o mesmo contrato e resolve a fonte ativa a cada chamada, permitiu acrescentar o GitLab sem
+alterar uma linha de `domain/` ou `application/`. Veja o
+[ADR-001](docs/decisions/001-isolate-domain-from-github-api.md) e o
+[ADR-002](docs/decisions/002-application-layer-use-cases.md).
+
+### Contratos antes de implementações
+
+Repositórios, datasources e serviços externos são declarados como interface em um arquivo e
+implementados em outro. São oito contratos e doze implementações, todas com `implements` explícito —
+quem verifica a relação é o compilador, não a convenção.
+
+| Contrato | Onde | Implementações |
+| --- | --- | --- |
+| `RepoRepository` | `domain/repositories/` | `GitHubRepoRepository`, `GitLabRepoRepository`, `SourceRoutedRepoRepository` |
+| `IssueRepository` | `domain/repositories/` | `GitHubIssueRepository`, `GitLabIssueRepository`, `SourceRoutedIssueRepository` |
+| `GitHubRepoDataSource`, `GitHubIssueDataSource` | `infrastructure/github/` | `AxiosGitHubRepoDataSource`, `AxiosGitHubIssueDataSource` |
+| `GitLabRepoDataSource`, `GitLabIssueDataSource` | `infrastructure/gitlab/` | `AxiosGitLabRepoDataSource`, `AxiosGitLabIssueDataSource` |
+| `DataSourcePreferenceStorage` | `domain/shared/` | `AsyncStorageDataSourcePreference` |
+| `ThemePreferenceStorage` | `design-system/theme/` | `AsyncStorageThemePreference` |
+
+O nome diz qual arquivo é qual: o contrato é o nome nu, a implementação leva a tecnologia como
+prefixo — `AxiosGitHubRepoDataSource` implementa `GitHubRepoDataSource`. Dá para distinguir os dois
+sem abrir nenhum.
+
+Existem **dois níveis de contrato, com vocabulários deliberadamente diferentes**:
+
+- **Port de domínio** — `search(query, page): Promise<Page<Repo>>`. Fala entidade.
+- **Port de datasource** — `searchProjects(query, page): Promise<GitLabPageDto<GitLabProjectDto>>`.
+  Fala o dialeto do provedor: o GitLab chama de *project*, e aqui pode.
+
+Por isso são dois e não um. Com um contrato só, ou o domínio engoliria o DTO, ou o datasource teria
+de mapear — e mapear é trabalho do `mappers.ts`, onde o vocabulário externo morre. Também vale um
+port por módulo, nunca um compartilhado: o repositório de issues não depende de métodos de busca que
+jamais chama.
+
+A entidade se chama `Repo`, e não `Repository`, porque o sufixo `Repository` já pertence ao padrão de
+port — ver [ADR-008](docs/decisions/008-name-the-repository-entity-repo.md).
+
 ### Camadas na raiz e organização por feature
 
 As fronteiras arquiteturais ficam explícitas na raiz de `src/`: `domain/`, `application/`,
@@ -234,6 +305,27 @@ singletons em tempo de módulo e permitindo injetar fakes em testes. A configura
 Query também vive em `presentation/`, mantendo as rotas do Expo Router como wrappers finos. Veja o
 [ADR-003](docs/decisions/003-presentation-layer-and-dependency-injection.md).
 
+### Apresentação desacoplada
+
+`src/presentation/` não importa `@/infrastructure`, Axios nem AsyncStorage. Nenhuma vez — e a regra
+de lint que garante isso não tem exceção.
+
+Telas consomem hooks, hooks resolvem o service pelo contexto. A cadeia da busca é
+`app/index.tsx` (duas linhas, só reexporta) → `SearchScreen` → `useSearchRepos` → `RepoService`
+injetado → port de domínio. A tela não conhece service, o hook não conhece adapter, e nenhum dos dois
+sabe que existe GitHub.
+
+O caso do storage mostra a distância: `DataSourceToggle` chama `setSource(id)` do contexto; o
+`DataSourceProvider` persiste através de `DataSourcePreferenceStorage` — uma interface, cujo valor
+padrão é uma implementação no-op; o adapter real de AsyncStorage entra em `app/_layout.tsx`. Três
+abstrações entre o toque e o `setItem`, e trocar por MMKV altera uma linha do layout.
+
+Toda a montagem vive nesse único arquivo. Os providers não têm implementação padrão: `services`,
+`selection` e `createClient` são props obrigatórias, e pedir um service que ninguém injetou lança um
+erro nomeado em vez de cair no container de produção — o que antes fazia um teste distraído bater na
+rede de verdade, em silêncio. Veja o
+[ADR-010](docs/decisions/010-enforce-layer-boundaries-in-lint.md).
+
 ### Domínio independente da API
 
 Entidades e interfaces de repositório ficam em `src/domain` e não importam Axios, React, Expo,
@@ -241,7 +333,9 @@ TanStack Query ou qualquer outra dependência externa. Os formatos retornados pe
 em `src/infrastructure/github/dtos.ts`, os do GitLab em `src/infrastructure/gitlab/dtos.ts`, e
 ambos são convertidos para as mesmas entidades por mappers na borda da aplicação. Datasources Axios cuidam somente de path, parâmetros e DTOs crus; os adapters de
 repository fazem mapeamento e paginação, enquanto o use case de issues mantém o filtro e a
-repaginação de pull requests. Assim, particularidades da API não vazam para telas e componentes.
+repaginação de pull requests — limitada a cinco páginas por chamada, devolvendo `nextPage` para que
+continuar a busca seja uma escolha de quem está na tela e não um gasto silencioso de rate limit
+([ADR-009](docs/decisions/009-bound-the-issue-page-scan.md)). Assim, particularidades da API não vazam para telas e componentes.
 Veja o [ADR-001](docs/decisions/001-isolate-domain-from-github-api.md).
 
 ### Use cases e services de aplicação
@@ -266,11 +360,14 @@ aparência de headers são responsabilidades de framework e apresentação. Veja
 ### Contrato de erro no domínio
 
 `domain/errors/DataAccessError.ts` declara a falha de acesso a dado com um `kind` — `rateLimit`,
-`notFound`, `network` ou `unknown` — e o guard `isRateLimitError`. A infraestrutura traduz o status
+`notFound`, `network`, `cancelled` ou `unknown` — e os guards `isRateLimitError` e
+`isCancelledError`. A infraestrutura traduz o status
 HTTP para esse vocabulário no interceptor, de modo que códigos 403, 404 e 429 não existem fora de
 `infrastructure/github`. Telas e query client dependem do guard de domínio, e renomear um `kind`
-passa a quebrar no `type-check`. Veja o
-[ADR-005](docs/decisions/005-domain-owned-error-contract.md).
+passa a quebrar no `type-check`. Uma requisição abortada pelo próprio app também cruza a fronteira
+nesse vocabulário — `cancelled` — em vez de vazar o `CanceledError` do Axios ou se disfarçar de falha
+de rede. Veja o [ADR-005](docs/decisions/005-domain-owned-error-contract.md) e o
+[ADR-007](docs/decisions/007-caller-driven-request-cancellation.md).
 
 ### Fontes de dados alternáveis em tempo de execução
 
@@ -321,7 +418,7 @@ Todos leem tokens via `useTheme()` — zero valores hex fixos ou estilos inline 
 
 ### Tratamento de erros e rate limit
 
-Cada client Axios normaliza os erros da sua fonte em `DataAccessError`, o contrato de domínio com o `kind` `rateLimit`, `notFound`, `network` ou `unknown` — o GitHub mapeia 403 e 429 para `rateLimit`, o GitLab apenas 429 (no GitLab, 403 é falha de autorização). O guard `isRateLimitError` desabilita retentativas automáticas no `QueryClient` raiz e exibe um estado de erro dedicado em cada tela, sugerindo configurar um token no `.env`. Erros genéricos recebem um botão de nova tentativa que re-executa a query falha. Códigos HTTP não existem fora de `infrastructure/`.
+Cada client Axios normaliza os erros da sua fonte em `DataAccessError`, o contrato de domínio com o `kind` `rateLimit`, `notFound`, `network`, `cancelled` ou `unknown` — o GitHub mapeia 403 e 429 para `rateLimit`, o GitLab apenas 429 (no GitLab, 403 é falha de autorização). O guard `isRateLimitError` desabilita retentativas automáticas no `QueryClient` raiz e exibe um estado de erro dedicado em cada tela, sugerindo configurar um token no `.env`. Erros genéricos recebem um botão de nova tentativa que re-executa a query falha. Códigos HTTP não existem fora de `infrastructure/`.
 
 ---
 
