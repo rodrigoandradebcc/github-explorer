@@ -1,5 +1,5 @@
-import type { RepositoryDetails } from '@/domain/entities/Repository';
-import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
+import type { RepoDetails } from '@/domain/entities/Repo';
+import type { RepoRepository } from '@/domain/repositories/RepoRepository';
 
 export interface GetRepoDetailsInput {
   owner: string;
@@ -8,9 +8,9 @@ export interface GetRepoDetailsInput {
 }
 
 export class GetRepoDetailsUseCase {
-  constructor(private readonly repositories: RepositoryRepository) {}
+  constructor(private readonly repositories: RepoRepository) {}
 
-  async execute({ owner, name, signal }: GetRepoDetailsInput): Promise<RepositoryDetails> {
+  async execute({ owner, name, signal }: GetRepoDetailsInput): Promise<RepoDetails> {
     const normalizedOwner = owner.trim();
     const normalizedName = name.trim();
 

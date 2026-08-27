@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 import type { GitLabProjectDetailsDto } from '../dtos';
-import { AxiosGitLabRepositoryDataSource } from '../AxiosGitLabRepositoryDataSource';
+import { AxiosGitLabRepoDataSource } from '../AxiosGitLabRepoDataSource';
 
 jest.mock('../client', () => ({ apiClient: { get: jest.fn() } }));
 
@@ -8,14 +8,14 @@ const mockGet = apiClient.get as jest.Mock;
 
 beforeEach(() => jest.clearAllMocks());
 
-describe('AxiosGitLabRepositoryDataSource', () => {
+describe('AxiosGitLabRepoDataSource', () => {
   it('requests a project search with the expected path, params, and page headers', async () => {
     mockGet.mockResolvedValueOnce({
       data: [],
       headers: { 'x-total': '55', 'x-next-page': '3' },
     });
 
-    const result = await new AxiosGitLabRepositoryDataSource().searchProjects('react', 2);
+    const result = await new AxiosGitLabRepoDataSource().searchProjects('react', 2);
 
     expect(mockGet).toHaveBeenCalledWith('/projects', {
       params: { search: 'react', order_by: 'star_count', sort: 'desc', page: 2, per_page: 20 },
@@ -27,7 +27,7 @@ describe('AxiosGitLabRepositoryDataSource', () => {
   it('returns null headers when GitLab omits or empties them', async () => {
     mockGet.mockResolvedValueOnce({ data: [], headers: { 'x-next-page': '' } });
 
-    const result = await new AxiosGitLabRepositoryDataSource().searchProjects('react', 9);
+    const result = await new AxiosGitLabRepoDataSource().searchProjects('react', 9);
 
     expect(result).toEqual({ items: [], totalHeader: null, nextPageHeader: null });
   });
@@ -36,7 +36,7 @@ describe('AxiosGitLabRepositoryDataSource', () => {
     const response = { id: 1 } as GitLabProjectDetailsDto;
     mockGet.mockResolvedValueOnce({ data: response, headers: {} });
 
-    const result = await new AxiosGitLabRepositoryDataSource().getProject('gitlab-org/gitlab-foss');
+    const result = await new AxiosGitLabRepoDataSource().getProject('gitlab-org/gitlab-foss');
 
     expect(mockGet).toHaveBeenCalledWith('/projects/gitlab-org%2Fgitlab-foss', {
       signal: undefined,
@@ -47,7 +47,7 @@ describe('AxiosGitLabRepositoryDataSource', () => {
   it('hands the abort signal to Axios on both calls', async () => {
     const { signal } = new AbortController();
     mockGet.mockResolvedValue({ data: [], headers: {} });
-    const dataSource = new AxiosGitLabRepositoryDataSource();
+    const dataSource = new AxiosGitLabRepoDataSource();
 
     await dataSource.searchProjects('react', 1, { signal });
     await dataSource.getProject('gitlab-org/gitlab-foss', { signal });

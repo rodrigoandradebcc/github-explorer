@@ -5,12 +5,10 @@ import type {
 } from '../dtos';
 import type { GitHubIssueDataSource } from '../GitHubIssueDataSource';
 import { GitHubIssueRepository } from '../GitHubIssueRepository';
-import type { GitHubRepositoryDataSource } from '../GitHubRepositoryDataSource';
-import { GitHubRepositoryRepository } from '../GitHubRepositoryRepository';
+import type { GitHubRepoDataSource } from '../GitHubRepoDataSource';
+import { GitHubRepoRepository } from '../GitHubRepoRepository';
 
-function fakeRepositoryDataSource(
-  overrides: Partial<GitHubRepositoryDataSource> = {},
-): GitHubRepositoryDataSource {
+function fakeRepoDataSource(overrides: Partial<GitHubRepoDataSource> = {}): GitHubRepoDataSource {
   return { searchRepositories: jest.fn(), getRepository: jest.fn(), ...overrides };
 }
 
@@ -65,18 +63,18 @@ const mockIssue: GitHubIssueDto = {
   html_url: 'https://github.com/facebook/react/issues/42',
 };
 
-describe('GitHubRepositoryRepository', () => {
+describe('GitHubRepoRepository', () => {
   it('maps a full middle search page and advances pagination', async () => {
     const response: GitHubSearchRepositoriesResponseDto = {
       total_count: 21,
       incomplete_results: false,
       items: Array.from({ length: 20 }, (_, id) => ({ ...mockRepository, id })),
     };
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchRepositories: jest.fn().mockResolvedValue(response),
     });
 
-    const result = await new GitHubRepositoryRepository(dataSource).search('react', 1);
+    const result = await new GitHubRepoRepository(dataSource).search('react', 1);
 
     expect(dataSource.searchRepositories).toHaveBeenCalledWith('react', 1, undefined);
     expect(result).toMatchObject({ total: 21, nextPage: 2 });
@@ -89,7 +87,7 @@ describe('GitHubRepositoryRepository', () => {
   });
 
   it('stops at the last page supported by the GitHub search result window', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchRepositories: jest.fn().mockResolvedValue({
         total_count: 1500,
         incomplete_results: false,
@@ -97,13 +95,13 @@ describe('GitHubRepositoryRepository', () => {
       }),
     });
 
-    const result = await new GitHubRepositoryRepository(dataSource).search('react', 50);
+    const result = await new GitHubRepoRepository(dataSource).search('react', 50);
 
     expect(result.nextPage).toBeNull();
   });
 
   it('stops when the search response contains a partial page', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchRepositories: jest.fn().mockResolvedValue({
         total_count: 100,
         incomplete_results: false,
@@ -111,17 +109,17 @@ describe('GitHubRepositoryRepository', () => {
       }),
     });
 
-    const result = await new GitHubRepositoryRepository(dataSource).search('react', 2);
+    const result = await new GitHubRepoRepository(dataSource).search('react', 2);
 
     expect(result.nextPage).toBeNull();
   });
 
   it('loads repository details and maps its specific fields', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       getRepository: jest.fn().mockResolvedValue(mockRepository),
     });
 
-    const result = await new GitHubRepositoryRepository(dataSource).findByOwnerAndName(
+    const result = await new GitHubRepoRepository(dataSource).findByOwnerAndName(
       'facebook',
       'react',
     );
@@ -180,19 +178,19 @@ describe('GitHubIssueRepository', () => {
 describe('GitHub adapters forward request options', () => {
   it('passes the abort signal straight through to the datasource', async () => {
     const { signal } = new AbortController();
-    const repositoryDataSource = fakeRepositoryDataSource({
+    const repoDataSource = fakeRepoDataSource({
       searchRepositories: jest.fn().mockResolvedValue({ total_count: 0, items: [] }),
     });
     const issueDataSource = fakeIssueDataSource({
       listOpenIssues: jest.fn().mockResolvedValue([]),
     });
 
-    await new GitHubRepositoryRepository(repositoryDataSource).search('react', 1, { signal });
+    await new GitHubRepoRepository(repoDataSource).search('react', 1, { signal });
     await new GitHubIssueRepository(issueDataSource).findOpenByRepository('facebook', 'react', 1, {
       signal,
     });
 
-    expect(repositoryDataSource.searchRepositories).toHaveBeenCalledWith('react', 1, { signal });
+    expect(repoDataSource.searchRepositories).toHaveBeenCalledWith('react', 1, { signal });
     expect(issueDataSource.listOpenIssues).toHaveBeenCalledWith('facebook', 'react', 1, { signal });
   });
 });

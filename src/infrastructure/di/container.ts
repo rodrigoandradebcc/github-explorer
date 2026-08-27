@@ -5,32 +5,32 @@ import { RepoService } from '@/application/repositories/RepoService';
 import { SearchReposUseCase } from '@/application/repositories/SearchReposUseCase';
 import { DataSourceSelection } from '@/domain/shared/DataSourceSelection';
 import { AxiosGitHubIssueDataSource } from '@/infrastructure/github/AxiosGitHubIssueDataSource';
-import { AxiosGitHubRepositoryDataSource } from '@/infrastructure/github/AxiosGitHubRepositoryDataSource';
+import { AxiosGitHubRepoDataSource } from '@/infrastructure/github/AxiosGitHubRepoDataSource';
 import { GitHubIssueRepository } from '@/infrastructure/github/GitHubIssueRepository';
-import { GitHubRepositoryRepository } from '@/infrastructure/github/GitHubRepositoryRepository';
+import { GitHubRepoRepository } from '@/infrastructure/github/GitHubRepoRepository';
 import { AxiosGitLabIssueDataSource } from '@/infrastructure/gitlab/AxiosGitLabIssueDataSource';
-import { AxiosGitLabRepositoryDataSource } from '@/infrastructure/gitlab/AxiosGitLabRepositoryDataSource';
+import { AxiosGitLabRepoDataSource } from '@/infrastructure/gitlab/AxiosGitLabRepoDataSource';
 import { GitLabIssueRepository } from '@/infrastructure/gitlab/GitLabIssueRepository';
-import { GitLabRepositoryRepository } from '@/infrastructure/gitlab/GitLabRepositoryRepository';
+import { GitLabRepoRepository } from '@/infrastructure/gitlab/GitLabRepoRepository';
 
 import type { DataSourceRegistry } from './DataSourceRegistry';
 import { SourceRoutedIssueRepository } from './SourceRoutedIssueRepository';
-import { SourceRoutedRepositoryRepository } from './SourceRoutedRepositoryRepository';
+import { SourceRoutedRepoRepository } from './SourceRoutedRepoRepository';
 
 export const dataSourceSelection = new DataSourceSelection('github');
 
 const registry: DataSourceRegistry = {
   github: {
-    repositories: new GitHubRepositoryRepository(new AxiosGitHubRepositoryDataSource()),
+    repos: new GitHubRepoRepository(new AxiosGitHubRepoDataSource()),
     issues: new GitHubIssueRepository(new AxiosGitHubIssueDataSource()),
   },
   gitlab: {
-    repositories: new GitLabRepositoryRepository(new AxiosGitLabRepositoryDataSource()),
+    repos: new GitLabRepoRepository(new AxiosGitLabRepoDataSource()),
     issues: new GitLabIssueRepository(new AxiosGitLabIssueDataSource()),
   },
 };
 
-const repositoryRepository = new SourceRoutedRepositoryRepository(
+const repositoryRepository = new SourceRoutedRepoRepository(
   registry,
   () => dataSourceSelection.current,
 );

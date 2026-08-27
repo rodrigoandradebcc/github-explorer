@@ -3,10 +3,10 @@ import type { RequestOptions } from '@/domain/shared/RequestOptions';
 import { apiClient } from './client';
 import { GITLAB_PAGE_SIZE } from './constants';
 import type { GitLabProjectDetailsDto, GitLabProjectDto } from './dtos';
-import type { GitLabRepositoryDataSource } from './GitLabRepositoryDataSource';
+import type { GitLabRepoDataSource } from './GitLabRepoDataSource';
 import { toPageDto } from './pageHeaders';
 
-export class AxiosGitLabRepositoryDataSource implements GitLabRepositoryDataSource {
+export class AxiosGitLabRepoDataSource implements GitLabRepoDataSource {
   async searchProjects(query: string, page: number, options: RequestOptions = {}) {
     const response = await apiClient.get<GitLabProjectDto[]>('/projects', {
       params: {

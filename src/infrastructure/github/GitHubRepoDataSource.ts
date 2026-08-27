@@ -2,7 +2,7 @@ import type { RequestOptions } from '@/domain/shared/RequestOptions';
 
 import type { GitHubRepositoryDetailsDto, GitHubSearchRepositoriesResponseDto } from './dtos';
 
-export interface GitHubRepositoryDataSource {
+export interface GitHubRepoDataSource {
   searchRepositories(
     query: string,
     page: number,

@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import React from 'react';
 
 import type { RepoService } from '@/application';
-import type { Repository } from '@/domain/entities/Repository';
+import type { Repo } from '@/domain/entities/Repo';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { applicationServicesWithRepo } from '@/presentation/di/ApplicationProvider';
 
@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 
-const injectedRepository: Repository = {
+const injectedRepository: Repo = {
   id: 42,
   name: 'injected-repository',
   fullName: 'example/injected-repository',
@@ -87,7 +87,7 @@ describe('SearchScreen service injection', () => {
   });
 
   it('URL-encodes route segments when opening a repository', async () => {
-    const nested: Repository = {
+    const nested: Repo = {
       ...injectedRepository,
       owner: { ...injectedRepository.owner, login: 'group/subgroup' },
     };

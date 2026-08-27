@@ -3,7 +3,7 @@ import React from 'react';
 
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
-import type { Repository } from '@/domain/entities/Repository';
+import type { Repo } from '@/domain/entities/Repo';
 import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { SearchScreen } from '../SearchScreen';
@@ -21,7 +21,7 @@ const mockHook = useSearchRepos as jest.MockedFunction<typeof useSearchRepos>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const makeRepo = (overrides: Partial<Repository> = {}): Repository => ({
+const makeRepo = (overrides: Partial<Repo> = {}): Repo => ({
   id: 1,
   name: 'react',
   fullName: 'facebook/react',

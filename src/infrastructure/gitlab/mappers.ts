@@ -1,6 +1,6 @@
 import type { Issue } from '@/domain/entities/Issue';
 import type { Owner } from '@/domain/entities/Owner';
-import type { Repository, RepositoryDetails } from '@/domain/entities/Repository';
+import type { Repo, RepoDetails } from '@/domain/entities/Repo';
 
 import { GITLAB_WEB_BASE_URL } from './constants';
 import type {
@@ -36,7 +36,7 @@ function mapAuthorOwner(dto: GitLabIssueAuthorDto): Owner {
   };
 }
 
-export function mapProject(dto: GitLabProjectDto): Repository {
+export function mapProject(dto: GitLabProjectDto): Repo {
   return {
     id: dto.id,
     name: dto.path,
@@ -55,7 +55,7 @@ export function mapProject(dto: GitLabProjectDto): Repository {
   };
 }
 
-export function mapProjectDetails(dto: GitLabProjectDetailsDto): RepositoryDetails {
+export function mapProjectDetails(dto: GitLabProjectDetailsDto): RepoDetails {
   return {
     ...mapProject(dto),
     watchersCount: null,

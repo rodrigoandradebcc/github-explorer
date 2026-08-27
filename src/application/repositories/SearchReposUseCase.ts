@@ -1,5 +1,5 @@
-import type { Repository } from '@/domain/entities/Repository';
-import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
+import type { Repo } from '@/domain/entities/Repo';
+import type { RepoRepository } from '@/domain/repositories/RepoRepository';
 import type { Page } from '@/domain/shared/Page';
 
 export interface SearchReposInput {
@@ -9,9 +9,9 @@ export interface SearchReposInput {
 }
 
 export class SearchReposUseCase {
-  constructor(private readonly repositories: RepositoryRepository) {}
+  constructor(private readonly repositories: RepoRepository) {}
 
-  async execute({ query, page = 1, signal }: SearchReposInput): Promise<Page<Repository>> {
+  async execute({ query, page = 1, signal }: SearchReposInput): Promise<Page<Repo>> {
     const normalizedQuery = query.trim();
     if (!normalizedQuery) return { items: [], total: 0, nextPage: null };
 

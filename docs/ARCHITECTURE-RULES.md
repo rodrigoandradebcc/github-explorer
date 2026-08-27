@@ -40,9 +40,9 @@ Import de `@/infrastructure` fora de `presentation/di/` e `app/_layout.tsx` é b
 ```
 src/
 ├── domain/
-│   ├── entities/          Repository, RepositoryDetails, Issue, IssueLabel, Owner, issueRules
+│   ├── entities/          Repo, RepoDetails, Issue, IssueLabel, Owner, issueRules
 │   ├── errors/            DataAccessError (kind: rateLimit|notFound|network|unknown) + isRateLimitError
-│   ├── repositories/      RepositoryRepository, IssueRepository   (ports)
+│   ├── repositories/      RepoRepository, IssueRepository   (ports)
 │   └── shared/            Page<T>, DataSource (DATA_SOURCE_IDS/DataSourceId),
 │                          DataSourceSelection, DataSourcePreferenceStorage
 ├── application/
@@ -98,16 +98,20 @@ Motivo: a regra de paginação é a parte não-trivial e precisa ser testável c
 
 | Coisa | Padrão | Exemplo |
 | --- | --- | --- |
-| Entidade | PascalCase, singular | `Repository.ts` |
-| Port de repositório | `<Entidade>Repository` | `IssueRepository` |
+| Entidade | PascalCase, singular | `Repo.ts` |
+| Port de repositório | `<Entidade>Repository` | `IssueRepository`, `RepoRepository` |
 | Use case | `<Verbo><Alvo>UseCase` | `SearchReposUseCase` |
 | Service | `<Módulo>Service` | `RepoService` |
-| Port de datasource | `<Provider><Módulo>DataSource` | `GitHubIssueDataSource` |
+| Port de datasource | `<Provider><Módulo>DataSource` | `GitHubIssueDataSource`, `GitHubRepoDataSource` |
 | Implementação | `<Lib><Port>` | `AxiosGitHubIssueDataSource` |
 | Adapter de repositório | `<Provider><Entidade>Repository` | `GitHubIssueRepository` |
 | Hook de UI | `use<Ação>` | `useSearchRepos` |
 
 Nome de método diz o que faz: `listOpenIssues`, não `listIssues` com `state: 'open'` escondido dentro.
+
+A entidade é `Repo`, não `Repository`: o sufixo `Repository` já é do padrão de port, e usar a mesma
+palavra para a entidade produzia `RepositoryRepository`. Vocabulário de provider — `GitHubRepositoryDto`,
+`searchRepositories`, `/search/repositories` — não muda: ele morre no mapper (§5.5). Ver ADR-008.
 
 ## 8. Padrão de teste por camada
 

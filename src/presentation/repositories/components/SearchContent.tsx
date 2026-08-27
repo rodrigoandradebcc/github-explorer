@@ -5,7 +5,7 @@ import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 import { Box, Input, useTheme } from '@/design-system';
 import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
 import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
-import type { Repository } from '@/domain/entities/Repository';
+import type { Repo } from '@/domain/entities/Repo';
 
 import { RepositoryCard } from './RepositoryCard';
 import { SearchEmptyPrompt } from './SearchEmptyPrompt';
@@ -13,7 +13,7 @@ import { SearchEmptyResults } from './SearchEmptyResults';
 import { SearchSkeletonList } from './SearchSkeletonList';
 
 interface SearchResult {
-  repos: Repository[];
+  repos: Repo[];
   query: string;
   hasQuery: boolean;
   isLoading: boolean;
@@ -32,7 +32,7 @@ interface SearchContentProps {
   onRetry: () => void;
   onRefresh: () => void;
   onEndReached: () => void;
-  onRepoPress: (repo: Repository) => void;
+  onRepoPress: (repo: Repo) => void;
 }
 
 export function SearchContent({
@@ -85,7 +85,7 @@ export function SearchContent({
   );
 
   const renderItem = useCallback(
-    ({ item, index }: { item: Repository; index: number }) => {
+    ({ item, index }: { item: Repo; index: number }) => {
       const animate = !animatedIds.current.has(item.id);
       if (animate) animatedIds.current.add(item.id);
       return (

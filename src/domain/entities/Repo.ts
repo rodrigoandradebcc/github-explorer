@@ -1,6 +1,6 @@
 import type { Owner } from './Owner';
 
-export interface Repository {
+export interface Repo {
   id: number;
   name: string;
   fullName: string;
@@ -17,7 +17,7 @@ export interface Repository {
   isPrivate: boolean;
 }
 
-export interface RepositoryDetails extends Repository {
+export interface RepoDetails extends Repo {
   watchersCount: number | null;
   subscribersCount: number | null;
   networkCount: number | null;

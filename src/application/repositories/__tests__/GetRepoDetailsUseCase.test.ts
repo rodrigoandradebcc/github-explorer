@@ -1,8 +1,8 @@
-import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
+import type { RepoRepository } from '@/domain/repositories/RepoRepository';
 
 import { GetRepoDetailsUseCase } from '../GetRepoDetailsUseCase';
 
-function makeRepositoryPort(): jest.Mocked<RepositoryRepository> {
+function makeRepositoryPort(): jest.Mocked<RepoRepository> {
   return {
     search: jest.fn(),
     findByOwnerAndName: jest.fn(),

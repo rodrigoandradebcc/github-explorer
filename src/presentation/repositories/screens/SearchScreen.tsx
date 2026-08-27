@@ -8,7 +8,7 @@ import { isRateLimitError } from '@/domain/errors/DataAccessError';
 import { useSearchRepos } from '@/presentation/repositories/hooks/useSearchRepos';
 import { DataSourceToggle } from '@/presentation/shared/components/DataSourceToggle';
 import { useDebounce } from '@/presentation/shared/hooks/useDebounce';
-import type { Repository } from '@/domain/entities/Repository';
+import type { Repo } from '@/domain/entities/Repo';
 
 import { SearchBottomTabBar } from '../components/SearchBottomTabBar';
 import { SearchContent } from '../components/SearchContent';
@@ -45,7 +45,7 @@ export function SearchScreen() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleRepoPress = useCallback(
-    (repo: Repository) => {
+    (repo: Repo) => {
       router.push(
         `/repository/${encodeURIComponent(repo.owner.login)}/${encodeURIComponent(repo.name)}`,
       );

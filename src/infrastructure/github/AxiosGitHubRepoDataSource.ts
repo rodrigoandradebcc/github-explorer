@@ -3,9 +3,9 @@ import type { RequestOptions } from '@/domain/shared/RequestOptions';
 import { apiClient } from './client';
 import { GITHUB_PAGE_SIZE } from './constants';
 import type { GitHubRepositoryDetailsDto, GitHubSearchRepositoriesResponseDto } from './dtos';
-import type { GitHubRepositoryDataSource } from './GitHubRepositoryDataSource';
+import type { GitHubRepoDataSource } from './GitHubRepoDataSource';
 
-export class AxiosGitHubRepositoryDataSource implements GitHubRepositoryDataSource {
+export class AxiosGitHubRepoDataSource implements GitHubRepoDataSource {
   async searchRepositories(query: string, page: number, options: RequestOptions = {}) {
     const { data } = await apiClient.get<GitHubSearchRepositoriesResponseDto>(
       '/search/repositories',

@@ -1,6 +1,6 @@
 import type { Issue } from '@/domain/entities/Issue';
 import type { Owner } from '@/domain/entities/Owner';
-import type { Repository, RepositoryDetails } from '@/domain/entities/Repository';
+import type { Repo, RepoDetails } from '@/domain/entities/Repo';
 
 import type {
   GitHubIssueDto,
@@ -19,7 +19,7 @@ function mapOwner(dto: GitHubOwnerDto): Owner {
   };
 }
 
-export function mapRepository(dto: GitHubRepositoryDto): Repository {
+export function mapRepo(dto: GitHubRepositoryDto): Repo {
   return {
     id: dto.id,
     name: dto.name,
@@ -38,9 +38,9 @@ export function mapRepository(dto: GitHubRepositoryDto): Repository {
   };
 }
 
-export function mapRepositoryDetails(dto: GitHubRepositoryDetailsDto): RepositoryDetails {
+export function mapRepoDetails(dto: GitHubRepositoryDetailsDto): RepoDetails {
   return {
-    ...mapRepository(dto),
+    ...mapRepo(dto),
     watchersCount: dto.watchers_count,
     subscribersCount: dto.subscribers_count,
     networkCount: dto.network_count,

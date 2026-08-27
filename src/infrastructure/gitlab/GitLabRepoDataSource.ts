@@ -2,7 +2,7 @@ import type { RequestOptions } from '@/domain/shared/RequestOptions';
 
 import type { GitLabPageDto, GitLabProjectDetailsDto, GitLabProjectDto } from './dtos';
 
-export interface GitLabRepositoryDataSource {
+export interface GitLabRepoDataSource {
   searchProjects(
     query: string,
     page: number,

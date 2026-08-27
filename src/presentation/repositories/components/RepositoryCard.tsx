@@ -10,11 +10,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Avatar, Badge, Box, Card, Heading, Text, useTheme } from '@/design-system';
-import type { Repository } from '@/domain/entities/Repository';
+import type { Repo } from '@/domain/entities/Repo';
 import { formatCount } from '@/presentation/shared/formatCount';
 
 interface RepositoryCardProps {
-  repo: Repository;
+  repo: Repo;
   onPress: () => void;
   testID?: string;
   index?: number;

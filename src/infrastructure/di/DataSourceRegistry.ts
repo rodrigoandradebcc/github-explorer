@@ -1,9 +1,9 @@
 import type { IssueRepository } from '@/domain/repositories/IssueRepository';
-import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
+import type { RepoRepository } from '@/domain/repositories/RepoRepository';
 import type { DataSourceId } from '@/domain/shared/DataSource';
 
 export interface DataSourceRegistryEntry {
-  repositories: RepositoryRepository;
+  repos: RepoRepository;
   issues: IssueRepository;
 }
 

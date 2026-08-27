@@ -1,13 +1,11 @@
 import type { GitLabIssueDto, GitLabProjectDetailsDto } from '../dtos';
 import type { GitLabIssueDataSource } from '../GitLabIssueDataSource';
 import { GitLabIssueRepository } from '../GitLabIssueRepository';
-import type { GitLabRepositoryDataSource } from '../GitLabRepositoryDataSource';
-import { GitLabRepositoryRepository } from '../GitLabRepositoryRepository';
+import type { GitLabRepoDataSource } from '../GitLabRepoDataSource';
+import { GitLabRepoRepository } from '../GitLabRepoRepository';
 import { parsePositiveIntHeader } from '../mappers';
 
-function fakeRepositoryDataSource(
-  overrides: Partial<GitLabRepositoryDataSource> = {},
-): GitLabRepositoryDataSource {
+function fakeRepoDataSource(overrides: Partial<GitLabRepoDataSource> = {}): GitLabRepoDataSource {
   return { searchProjects: jest.fn(), getProject: jest.fn(), ...overrides };
 }
 
@@ -65,9 +63,9 @@ const mockIssue: GitLabIssueDto = {
   web_url: 'https://gitlab.com/gitlab-org/gitlab-foss/-/issues/7',
 };
 
-describe('GitLabRepositoryRepository', () => {
+describe('GitLabRepoRepository', () => {
   it('maps projects to source-agnostic entities and reads pagination from headers', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchProjects: jest.fn().mockResolvedValue({
         items: [mockProject],
         totalHeader: '55',
@@ -75,7 +73,7 @@ describe('GitLabRepositoryRepository', () => {
       }),
     });
 
-    const result = await new GitLabRepositoryRepository(dataSource).search('gitlab', 2);
+    const result = await new GitLabRepoRepository(dataSource).search('gitlab', 2);
 
     expect(dataSource.searchProjects).toHaveBeenCalledWith('gitlab', 2, undefined);
     expect(result.total).toBe(55);
@@ -98,7 +96,7 @@ describe('GitLabRepositoryRepository', () => {
   });
 
   it('ends pagination and total when GitLab omits the headers', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchProjects: jest.fn().mockResolvedValue({
         items: [mockProject],
         totalHeader: null,
@@ -106,18 +104,18 @@ describe('GitLabRepositoryRepository', () => {
       }),
     });
 
-    const result = await new GitLabRepositoryRepository(dataSource).search('gitlab', 1);
+    const result = await new GitLabRepoRepository(dataSource).search('gitlab', 1);
 
     expect(result.total).toBeNull();
     expect(result.nextPage).toBeNull();
   });
 
   it('loads details by full path and marks source-missing stats as null', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       getProject: jest.fn().mockResolvedValue(mockProject),
     });
 
-    const result = await new GitLabRepositoryRepository(dataSource).findByOwnerAndName(
+    const result = await new GitLabRepoRepository(dataSource).findByOwnerAndName(
       'gitlab-org',
       'gitlab-foss',
     );
@@ -206,9 +204,9 @@ const mockClosedIssue: GitLabIssueDto = {
   closed_at: '2024-03-04T05:06:07Z',
 };
 
-describe('GitLabRepositoryRepository mapping branches', () => {
+describe('GitLabRepoRepository mapping branches', () => {
   it('maps a user namespace to a user owner without re-prefixing absolute avatar URLs', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       searchProjects: jest.fn().mockResolvedValue({
         items: [mockUserNamespaceProject],
         totalHeader: '1',
@@ -216,7 +214,7 @@ describe('GitLabRepositoryRepository mapping branches', () => {
       }),
     });
 
-    const result = await new GitLabRepositoryRepository(dataSource).search('jane', 1);
+    const result = await new GitLabRepoRepository(dataSource).search('jane', 1);
 
     expect(result.items[0]?.owner).toEqual({
       id: 3,
@@ -228,11 +226,11 @@ describe('GitLabRepositoryRepository mapping branches', () => {
   });
 
   it('marks non-public visibility as private', async () => {
-    const dataSource = fakeRepositoryDataSource({
+    const dataSource = fakeRepoDataSource({
       getProject: jest.fn().mockResolvedValue(mockUserNamespaceProject),
     });
 
-    const result = await new GitLabRepositoryRepository(dataSource).findByOwnerAndName(
+    const result = await new GitLabRepoRepository(dataSource).findByOwnerAndName(
       'jane',
       'gitlab-foss',
     );
@@ -284,14 +282,14 @@ describe('GitLab adapters forward request options', () => {
   it('passes the abort signal straight through to the datasource', async () => {
     const { signal } = new AbortController();
     const emptyPage = { items: [], totalHeader: null, nextPageHeader: null };
-    const repositoryDataSource = fakeRepositoryDataSource({
+    const repoDataSource = fakeRepoDataSource({
       searchProjects: jest.fn().mockResolvedValue(emptyPage),
     });
     const issueDataSource = fakeIssueDataSource({
       listOpenIssues: jest.fn().mockResolvedValue(emptyPage),
     });
 
-    await new GitLabRepositoryRepository(repositoryDataSource).search('gitlab', 1, { signal });
+    await new GitLabRepoRepository(repoDataSource).search('gitlab', 1, { signal });
     await new GitLabIssueRepository(issueDataSource).findOpenByRepository(
       'gitlab-org',
       'gitlab-foss',
@@ -299,7 +297,7 @@ describe('GitLab adapters forward request options', () => {
       { signal },
     );
 
-    expect(repositoryDataSource.searchProjects).toHaveBeenCalledWith('gitlab', 1, { signal });
+    expect(repoDataSource.searchProjects).toHaveBeenCalledWith('gitlab', 1, { signal });
     expect(issueDataSource.listOpenIssues).toHaveBeenCalledWith('gitlab-org/gitlab-foss', 1, {
       signal,
     });

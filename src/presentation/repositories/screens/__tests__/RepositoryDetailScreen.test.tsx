@@ -3,7 +3,7 @@ import React from 'react';
 
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
 import { useRepoDetails } from '@/presentation/repositories/hooks/useRepoDetails';
-import type { RepositoryDetails } from '@/domain/entities/Repository';
+import type { RepoDetails } from '@/domain/entities/Repo';
 import { DataAccessError } from '@/domain/errors/DataAccessError';
 
 import { RepositoryDetailScreen } from '../RepositoryDetailScreen';
@@ -23,7 +23,7 @@ const mockHook = useRepoDetails as jest.MockedFunction<typeof useRepoDetails>;
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const makeDetail = (overrides: Partial<RepositoryDetails> = {}): RepositoryDetails => ({
+const makeDetail = (overrides: Partial<RepoDetails> = {}): RepoDetails => ({
   id: 1,
   name: 'react',
   fullName: 'facebook/react',

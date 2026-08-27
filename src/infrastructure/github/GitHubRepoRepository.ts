@@ -1,14 +1,14 @@
-import type { RepositoryRepository } from '@/domain/repositories/RepositoryRepository';
+import type { RepoRepository } from '@/domain/repositories/RepoRepository';
 import type { RequestOptions } from '@/domain/shared/RequestOptions';
 
 import { GITHUB_PAGE_SIZE } from './constants';
-import type { GitHubRepositoryDataSource } from './GitHubRepositoryDataSource';
-import { mapRepository, mapRepositoryDetails } from './mappers';
+import type { GitHubRepoDataSource } from './GitHubRepoDataSource';
+import { mapRepo, mapRepoDetails } from './mappers';
 
 const GITHUB_SEARCH_RESULT_LIMIT = 1000;
 
-export class GitHubRepositoryRepository implements RepositoryRepository {
-  constructor(private readonly dataSource: GitHubRepositoryDataSource) {}
+export class GitHubRepoRepository implements RepoRepository {
+  constructor(private readonly dataSource: GitHubRepoDataSource) {}
 
   async search(query: string, page = 1, options?: RequestOptions) {
     const data = await this.dataSource.searchRepositories(query, page, options);
@@ -16,7 +16,7 @@ export class GitHubRepositoryRepository implements RepositoryRepository {
     const lastSupportedPage = Math.ceil(GITHUB_SEARCH_RESULT_LIMIT / GITHUB_PAGE_SIZE);
     const loadedThroughThisPage = page * GITHUB_PAGE_SIZE;
     return {
-      items: data.items.map(mapRepository),
+      items: data.items.map(mapRepo),
       total: data.total_count,
       nextPage:
         data.items.length === GITHUB_PAGE_SIZE &&
@@ -29,6 +29,6 @@ export class GitHubRepositoryRepository implements RepositoryRepository {
 
   async findByOwnerAndName(owner: string, name: string, options?: RequestOptions) {
     const data = await this.dataSource.getRepository(owner, name, options);
-    return mapRepositoryDetails(data);
+    return mapRepoDetails(data);
   }
 }
