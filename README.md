@@ -24,6 +24,7 @@
 | Cache controlado via biblioteca | ✅ | TanStack Query v5: staleTime por rota, paginação infinita e retry inteligente |
 | Commits pequenos e descritivos | ✅ | Convenção Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`) |
 | README com instalação e arquitetura | ✅ | Seções abaixo |
+| Declaração de uso de IA no README | ✅ | Seção [Uso de IA](#uso-de-ia) |
 
 ---
 
@@ -148,7 +149,8 @@ src/
 │   ├── errors/                 # DataAccessError e o guard isRateLimitError
 │   ├── repositories/           # Interfaces dos repositórios (ports)
 │   └── shared/                 # Page<T>, RequestOptions, DataSource (ids),
-│                               #   DataSourceSelection, DataSourcePreferenceStorage
+│                               #   DataSourceSelection, DataSourcePreferenceStorage,
+│                               #   Theme, ThemePreferenceStorage
 │
 ├── application/                # Use cases e services independentes de frameworks
 │   ├── repositories/           # SearchRepos, GetRepoDetails e RepoService
@@ -200,7 +202,7 @@ src/
 │
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
 │   ├── tokens/                 # colors, spacing, radius, sizes
-│   ├── theme/                  # ThemeProvider + useTheme + porta de persistência
+│   ├── theme/                  # ThemeProvider + useTheme
 │   └── components/             # Avatar, Badge, Box, Button, Card, Heading,
 │                               #   Input, Skeleton, Switch, Text
 ```
@@ -274,7 +276,7 @@ quem verifica a relação é o compilador, não a convenção.
 | `GitHubRepoDataSource`, `GitHubIssueDataSource` | `infrastructure/github/` | `AxiosGitHubRepoDataSource`, `AxiosGitHubIssueDataSource` |
 | `GitLabRepoDataSource`, `GitLabIssueDataSource` | `infrastructure/gitlab/` | `AxiosGitLabRepoDataSource`, `AxiosGitLabIssueDataSource` |
 | `DataSourcePreferenceStorage` | `domain/shared/` | `AsyncStorageDataSourcePreference` |
-| `ThemePreferenceStorage` | `design-system/theme/` | `AsyncStorageThemePreference` |
+| `ThemePreferenceStorage` | `domain/shared/` | `AsyncStorageThemePreference` |
 
 O nome diz qual arquivo é qual: o contrato é o nome nu, a implementação leva a tecnologia como
 prefixo — `AxiosGitHubRepoDataSource` implementa `GitHubRepoDataSource`. Dá para distinguir os dois
@@ -362,9 +364,9 @@ Query também vive em `presentation/`, mantendo as rotas do Expo Router como wra
 
 Configuração do TanStack Query, montagem de dependências e persistência AsyncStorage ficam em
 `infrastructure/`. O `QueryProvider` e o `ThemeProvider` permanecem responsáveis apenas pela
-integração React; o design system define uma porta de persistência e funciona com implementação
-no-op quando usado isoladamente. Navegação continua em `app/` e `presentation/`, pois rotas e
-aparência de headers são responsabilidades de framework e apresentação. Veja o
+integração React; o domínio define a porta de persistência de tema e o design system funciona com
+implementação no-op quando usado isoladamente. Navegação continua em `app/` e `presentation/`,
+pois rotas e aparência de headers são responsabilidades de framework e apresentação. Veja o
 [ADR-004](docs/decisions/004-infrastructure-boundaries.md).
 
 ### Contrato de erro no domínio
@@ -429,6 +431,21 @@ Todos leem tokens via `useTheme()` — zero valores hex fixos ou estilos inline 
 ### Tratamento de erros e rate limit
 
 Cada client Axios normaliza os erros da sua fonte em `DataAccessError`, o contrato de domínio com o `kind` `rateLimit`, `notFound`, `network`, `cancelled` ou `unknown` — o GitHub mapeia 403 e 429 para `rateLimit`, o GitLab apenas 429 (no GitLab, 403 é falha de autorização). O guard `isRateLimitError` desabilita retentativas automáticas no `QueryClient` raiz e exibe um estado de erro dedicado em cada tela, sugerindo configurar um token no `.env`. Erros genéricos recebem um botão de nova tentativa que re-executa a query falha. Códigos HTTP não existem fora de `infrastructure/`.
+
+---
+
+## Uso de IA
+
+Usei **Claude Code** e **Codex** no desenvolvimento deste projeto. A arquitetura é minha — camadas,
+contratos, o checklist da seção 5 do documento de regras e os ADRs foram desenhados e escritos à
+mão; a implementação dentro dessas regras foi assistida por IA.
+
+A instrução permanente das duas ferramentas foi o próprio
+[docs/ARCHITECTURE-RULES.md](docs/ARCHITECTURE-RULES.md), carregado por `AGENTS.md` e
+`.claude/rules/architecture.md` — um "prompt de sistema" versionado junto com o código. As fronteiras
+entre camadas não dependem de confiança: violação de arquitetura é erro de `no-restricted-imports`
+em `eslint.config.js` e quebra `npm run lint`. Revisei a saída contra essas regras antes de aceitar,
+e o histórico de commits registra as correções.
 
 ---
 
