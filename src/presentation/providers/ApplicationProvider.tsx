@@ -47,7 +47,3 @@ export function useIssueService(): IssueService {
   }
   return issueService;
 }
-
-export const applicationServicesWithRepo = (
-  service: RepoService,
-): Partial<ApplicationServices> => ({ repoService: service });

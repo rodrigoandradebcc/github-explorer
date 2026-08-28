@@ -4,7 +4,6 @@ import React from 'react';
 import type { RepoService } from '@/application';
 import type { Repo } from '@/domain/entities/Repo';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
-import { applicationServicesWithRepo } from '@/presentation/providers/ApplicationProvider';
 
 import { SearchScreen } from '../SearchScreen';
 
@@ -52,9 +51,7 @@ describe('SearchScreen service injection', () => {
       details: jest.fn(),
     } as unknown as RepoService;
 
-    renderWithProviders(<SearchScreen />, {
-      services: applicationServicesWithRepo(repositoryService),
-    });
+    renderWithProviders(<SearchScreen />, { services: { repoService: repositoryService } });
     fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
 
     await waitFor(() => {
@@ -71,9 +68,7 @@ describe('SearchScreen service injection', () => {
     });
     const repositoryService = { search, details: jest.fn() } as unknown as RepoService;
 
-    renderWithProviders(<SearchScreen />, {
-      services: applicationServicesWithRepo(repositoryService),
-    });
+    renderWithProviders(<SearchScreen />, { services: { repoService: repositoryService } });
     fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
     await waitFor(() => expect(screen.getByText('injected-repository')).toBeTruthy());
     expect(search).toHaveBeenCalledTimes(1);
@@ -94,9 +89,7 @@ describe('SearchScreen service injection', () => {
     const search = jest.fn().mockResolvedValue({ items: [nested], total: 1, nextPage: null });
     const repositoryService = { search, details: jest.fn() } as unknown as RepoService;
 
-    renderWithProviders(<SearchScreen />, {
-      services: applicationServicesWithRepo(repositoryService),
-    });
+    renderWithProviders(<SearchScreen />, { services: { repoService: repositoryService } });
     fireEvent.changeText(screen.getByTestId('search-input'), 'injected');
     await waitFor(() => expect(screen.getByTestId(`repo-card-${nested.id}`)).toBeTruthy());
 

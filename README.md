@@ -5,7 +5,7 @@
 ![Expo SDK](https://img.shields.io/badge/Expo-54-000020?logo=expo&logoColor=white)
 ![React Native](https://img.shields.io/badge/React%20Native-0.81-61dafb?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/testes-184%20passando-brightgreen?logo=jest&logoColor=white)
+![Tests](https://img.shields.io/badge/testes-183%20passando-brightgreen?logo=jest&logoColor=white)
 
 ---
 
