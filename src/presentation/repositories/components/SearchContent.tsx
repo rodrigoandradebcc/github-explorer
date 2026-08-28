@@ -57,8 +57,6 @@ export function SearchContent({
 }: SearchContentProps) {
   const { colors, spacing } = useTheme();
 
-  // Repository ids are per-source integers and collide across sources, so the seen-set has to
-  // reset on a source switch as well as on a new query. `source` is an opaque reset key here.
   const source = useDataSourceScope();
   const animatedIds = useRef(new Set<number>());
   useEffect(() => {
@@ -110,9 +108,6 @@ export function SearchContent({
     [headerHeight, tabBarHeight],
   );
 
-  // Bottom padding lives in ListFooterComponent, not contentContainerStyle.paddingBottom,
-  // because Android ignores paddingBottom when data changes dynamically in FlatList.
-  // Math.max guards against tabBarHeight=0 before onLayout fires.
   const listFooter = useMemo(
     () => (
       <>

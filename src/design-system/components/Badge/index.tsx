@@ -55,7 +55,6 @@ export function Badge({ tone = 'default', size = 'md', children, testID }: Badge
         backgroundColor: toneStyles.bg,
         borderWidth: 1,
         borderColor: toneStyles.border,
-        // large radius creates pill shape regardless of content height
         borderRadius: 100,
         paddingVertical: sizeStyles.paddingVertical,
         paddingHorizontal: sizeStyles.paddingHorizontal,

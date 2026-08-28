@@ -34,8 +34,6 @@ export function DataSourceProvider({
 }) {
   const source = useSyncExternalStore(selection.subscribe, () => selection.current);
 
-  // An explicit user choice always wins over a persisted one that resolves later:
-  // `cancelled` only guards unmount, not a load that is superseded while in flight.
   const userChoseRef = useRef(false);
 
   useEffect(() => {

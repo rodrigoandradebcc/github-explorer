@@ -52,11 +52,6 @@ export interface GitLabIssueDto {
   web_url: string;
 }
 
-/**
- * GitLab paginates via response headers (x-total, x-next-page). The datasource
- * hands them over verbatim (string or null when absent/empty); the repository
- * adapter parses them. `total` may be absent for expensive queries.
- */
 export interface GitLabPageDto<T> {
   items: T[];
   totalHeader: string | null;

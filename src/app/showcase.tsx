@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import {
   Avatar,
@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   Card,
+  GlassView,
   Heading,
   Input,
   Skeleton,
@@ -95,7 +96,6 @@ export default function ShowcaseScreen() {
             <Box direction="column" gap="sm">
               {(Object.entries(colors) as [ColorKey, string][]).map(([key, value]) => (
                 <Box key={key} direction="row" align="center" gap="md">
-                  {/* Amostra — backgroundColor inline necessário para exibir o valor real do token */}
                   <View
                     style={{
                       width: 48,
@@ -121,7 +121,6 @@ export default function ShowcaseScreen() {
             <Box direction="column" gap="sm">
               {(Object.entries(spacing) as [SpacingKey, number][]).map(([key, value]) => (
                 <Box key={key} direction="row" align="center" gap="md">
-                  {/* Largura da barra proporcional ao token — estilo inline necessário */}
                   <View
                     style={{
                       width: value * 5,
@@ -312,6 +311,40 @@ export default function ShowcaseScreen() {
                 </Box>
               </Box>
             </Card>
+          </Section>
+
+          <Section title="Vidro">
+            <Box direction="column" gap="md">
+              <Text tone="muted" size="sm">
+                Superfície translúcida das barras fixas da busca. No iOS é desfoque real via
+                `expo-blur`; nas demais plataformas, camada sólida com opacidade.
+              </Text>
+
+              {([20, 60, 100] as const).map((intensity) => (
+                <Box key={intensity} direction="column" gap="xs">
+                  <Label>{`INTENSITY ${intensity}`}</Label>
+                  <View style={{ height: 96, borderRadius: radius.md, overflow: 'hidden' }}>
+                    <View style={[StyleSheet.absoluteFill, { flexDirection: 'row' }]}>
+                      {[colors.primary, colors.success, colors.warning, colors.danger].map((c) => (
+                        <View key={c} style={{ flex: 1, backgroundColor: c }} />
+                      ))}
+                    </View>
+                    <GlassView
+                      intensity={intensity}
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        padding: spacing.sm,
+                      }}
+                    >
+                      <Text weight="medium">GlassView</Text>
+                    </GlassView>
+                  </View>
+                </Box>
+              ))}
+            </Box>
           </Section>
         </Box>
       </ScrollView>

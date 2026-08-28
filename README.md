@@ -18,7 +18,7 @@
 | Busca de repositórios com paginação | ✅ | Scroll infinito via TanStack Query `useInfiniteQuery` + `onEndReached` |
 | Toque abre detalhes do repositório | ✅ | Navegação Expo Router para `/repository/:owner/:repo` |
 | Design System mínimo e tipado | ✅ | Tokens tipados (colors, spacing, radius, sizes) + 10 componentes base |
-| Showcase exibe todos os componentes | ✅ | Tela `/showcase` lista Avatar, Badge, Box, Button, Card, Heading, Input, Skeleton, Switch, Text com variações |
+| Showcase exibe todos os componentes | ✅ | Tela `/showcase` lista Avatar, Badge, Box, Button, Card, GlassView, Heading, Input, Skeleton, Switch, Text com variações |
 | Integração com API do GitHub | ✅ | Ports de domínio e adapters tipados em `src/infrastructure/github` |
 | Troca de fonte de dados em tempo de execução (GitHub/GitLab) | ✅ | Registry no composition root + repositórios roteados por fonte; toggle no header da busca; preferência persistida |
 | Cache controlado via biblioteca | ✅ | TanStack Query v5: staleTime por rota, paginação infinita e retry inteligente |
@@ -406,9 +406,9 @@ Todos os componentes vivem em `src/design-system/` e a **única** superfície p�
 | Token | Valores | Arquivo |
 | --- | --- | --- |
 | `colors` | paleta semântica clara/escura | `tokens/colors.ts` |
-| `spacing` | escala 4px (`xs` → `xxxl`) | `tokens/spacing.ts` |
-| `radius` | `sm`, `md`, `lg`, `full` | `tokens/radius.ts` |
-| `sizes` | alturas fixas de componentes | `tokens/sizes.ts` |
+| `spacing` | escala 4px (`xs` → `xl`) | `tokens/spacing.ts` |
+| `radius` | `sm`, `md`, `lg` | `tokens/radius.ts` |
+| `sizes` | escala tipográfica, usada como `fontSize` | `tokens/sizes.ts` |
 
 **Componentes disponíveis:** `Avatar`, `Badge`, `Box`, `Button`, `Card`, `GlassView`, `Heading`, `Input`, `Skeleton`, `Switch`, `Text`
 
