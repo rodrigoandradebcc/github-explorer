@@ -30,7 +30,7 @@
 
 ## Demonstração
 
-**[Ver demo ao vivo (Android & iOS)](https://jam.dev/c/5283ff5e-7183-43a1-abf2-cb98687b0d6f)**
+**[Ver demo ao vivo (Android & iOS)](https://jam.dev/c/b8cc7c63-68fc-4287-9026-9f5e0a034258)**
 
 ---
 
