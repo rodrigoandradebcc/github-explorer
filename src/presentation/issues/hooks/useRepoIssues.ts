@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { useIssueService } from '@/presentation/di/ApplicationProvider';
-import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
+import { useIssueService } from '@/presentation/providers/ApplicationProvider';
+import { useDataSourceScope } from '@/presentation/providers/DataSourceProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
 export function useRepoIssues(owner: string, repo: string) {

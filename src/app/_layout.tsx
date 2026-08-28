@@ -11,9 +11,9 @@ import {
   themePreference,
 } from '@/infrastructure/di';
 import { createQueryClient } from '@/infrastructure/query/queryClient';
-import { ApplicationProvider } from '@/presentation/di/ApplicationProvider';
-import { DataSourceProvider } from '@/presentation/di/DataSourceProvider';
-import { QueryProvider } from '@/presentation/di/QueryProvider';
+import { ApplicationProvider } from '@/presentation/providers/ApplicationProvider';
+import { DataSourceProvider } from '@/presentation/providers/DataSourceProvider';
+import { QueryProvider } from '@/presentation/providers/QueryProvider';
 
 function ThemedStack() {
   const { colors, mode } = useTheme();

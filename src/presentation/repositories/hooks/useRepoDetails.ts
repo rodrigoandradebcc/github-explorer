@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useRepoService } from '@/presentation/di/ApplicationProvider';
-import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
+import { useRepoService } from '@/presentation/providers/ApplicationProvider';
+import { useDataSourceScope } from '@/presentation/providers/DataSourceProvider';
 import { queryKeys } from '@/presentation/shared/queryKeys';
 
 export function useRepoDetails(owner: string, repo: string) {

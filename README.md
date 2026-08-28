@@ -197,7 +197,7 @@ src/
 │   │   ├── hooks/              # useDebounce
 │   │   ├── queryKeys.ts        # Chaves escopadas por fonte de dados
 │   │   └── formatCount.ts
-│   ├── di/                     # ApplicationProvider, QueryProvider, DataSourceProvider
+│   ├── providers/              # ApplicationProvider, QueryProvider, DataSourceProvider
 │   └── __test-utils__/         # renderWithProviders
 │
 ├── design-system/              # Biblioteca de componentes fechada (index.ts é a única superfície pública)
@@ -352,7 +352,7 @@ src/presentation/
 ├── repositories/     # busca, detalhe, componentes e hooks de repositório
 ├── issues/           # listagem, componentes e hooks de issues
 ├── shared/           # utilitários, componentes e navegação transversais à apresentação
-└── di/               # providers de serviços, server state e fonte de dados
+└── providers/        # serviços, server state e fonte de dados, via Context
 ```
 
 Os hooks resolvem `RepoService` e `IssueService` pelo `ApplicationProvider`, evitando imports de

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text, useTheme } from '@/design-system';
 import { DATA_SOURCE_IDS, type DataSourceId } from '@/domain/shared/DataSource';
-import { useDataSource } from '@/presentation/di/DataSourceProvider';
+import { useDataSource } from '@/presentation/providers/DataSourceProvider';
 
 const SOURCE_LABELS: Record<DataSourceId, string> = {
   github: 'GitHub',

@@ -4,7 +4,7 @@ import React from 'react';
 import type { RepoService } from '@/application';
 import type { Repo } from '@/domain/entities/Repo';
 import { renderWithProviders } from '@/presentation/__test-utils__/renderWithProviders';
-import { applicationServicesWithRepo } from '@/presentation/di/ApplicationProvider';
+import { applicationServicesWithRepo } from '@/presentation/providers/ApplicationProvider';
 
 import { SearchScreen } from '../SearchScreen';
 

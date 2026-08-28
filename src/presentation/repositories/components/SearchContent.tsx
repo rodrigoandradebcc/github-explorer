@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ActivityIndicator, FlatList, Platform, View } from 'react-native';
 
 import { Box, Input, useTheme } from '@/design-system';
-import { useDataSourceScope } from '@/presentation/di/DataSourceProvider';
+import { useDataSourceScope } from '@/presentation/providers/DataSourceProvider';
 import { DataAccessErrorState } from '@/presentation/shared/components/DataAccessErrorState';
 import type { Repo } from '@/domain/entities/Repo';
 

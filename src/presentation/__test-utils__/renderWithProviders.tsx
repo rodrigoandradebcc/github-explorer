@@ -7,8 +7,8 @@ import { DataSourceSelection } from '@/domain/shared/DataSourceSelection';
 import {
   ApplicationProvider,
   type ApplicationServices,
-} from '@/presentation/di/ApplicationProvider';
-import { DataSourceProvider } from '@/presentation/di/DataSourceProvider';
+} from '@/presentation/providers/ApplicationProvider';
+import { DataSourceProvider } from '@/presentation/providers/DataSourceProvider';
 
 interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
   services?: Partial<ApplicationServices>;

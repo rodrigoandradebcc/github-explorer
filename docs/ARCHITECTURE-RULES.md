@@ -30,10 +30,11 @@ Clean Architecture + Ports & Adapters. Cinco camadas, dependência sempre aponta
 | `application/` | só `domain/` — sem exceção |
 | `infrastructure/` | `domain/`; `application/` apenas em `di/container.ts` |
 | `design-system/` | só a si mesmo e `domain/` (tipos e ports de preferência) |
-| `presentation/` | `application/` (tipos), `domain/`, `design-system/`; `infrastructure/` só nos providers de `di/` |
+| `presentation/` | `application/` (tipos), `domain/`, `design-system/` — nunca `infrastructure/` |
 | `app/` | `presentation/`, `design-system/`, `infrastructure/` (só para injetar no composition root) |
 
-Import de `@/infrastructure` fora de `presentation/di/` e `app/_layout.tsx` é bug de arquitetura.
+Import de `@/infrastructure` fora de `app/_layout.tsx` é bug de arquitetura: a infraestrutura entra
+por lá e desce injetada nos providers de `presentation/providers/`.
 
 ## 4. Estrutura real
 
@@ -60,7 +61,7 @@ src/
 │   └── di/                container.ts + DataSourceRegistry + SourceRouted*Repository
 │                          — composition root
 ├── presentation/
-│   ├── di/                ApplicationProvider, QueryProvider, DataSourceProvider
+│   ├── providers/         ApplicationProvider, QueryProvider, DataSourceProvider
 │   ├── repositories/      components/, hooks/, screens/
 │   ├── issues/            components/, hooks/, screens/, utils/
 │   └── shared/            queryKeys, formatCount, hooks/useDebounce, components/,
